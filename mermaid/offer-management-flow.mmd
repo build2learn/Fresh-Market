@@ -1,0 +1,58 @@
+flowchart TD
+    Start([Admin selects Offer Management])
+    
+    Start --> LoadOffers[Load offers from Firestore]
+    LoadOffers --> OfferList[Display Offers List]
+    
+    OfferList --> Action{Choose Action}
+    
+    Action -->|Create| CreateOffer[Create Offer Flow]
+    Action -->|Edit| EditOffer[Edit Offer Flow]
+    Action -->|Toggle Active| ToggleActive[Toggle Active/Inactive]
+    Action -->|Delete| DeleteOffer[Delete Offer]
+    
+    subgraph CreateOffer [Create Offer]
+        A1[Show Offer Form]
+        A2[Enter Arabic Title & Description]
+        A3[Enter English Title & Description]
+        A4[Select Start Date & End Date]
+        A5[Upload Offer Image]
+        A6[Select Associated Products]
+        A7[Set Active Flag]
+        A8[Validate Input]
+        A9{Validation Passed?}
+        A10[Save to Firestore]
+        A11[Save Offer-Product Associations]
+        A12[Show Error]
+        A13[Send Push Notification to Customers]
+        
+        A1 --> A2 --> A3 --> A4 --> A5 --> A6 --> A7 --> A8 --> A9
+        A9 -->|Yes| A10
+        A9 -->|No| A12
+        A10 --> A11
+        A11 --> A13
+    end
+    
+    subgraph CustomerExperience [Customer Experience]
+        C1[Offer appears on Home Screen]
+        C2[Offers section shows new offer]
+        C3[Push notification received]
+        
+        C1 --> C2
+    end
+    
+    A13 --> C1
+    A13 --> C3
+    
+    subgraph RealTimeSync [Real-Time Sync]
+        R1[Firestore offer document changed]
+        R2[Offer snapshot listener triggered]
+        R3[offer_products snapshot listener triggered]
+        R4[StreamProvider emits new data]
+        R5[All clients rebuild]
+        
+        R1 --> R2 --> R4 --> R5
+        R1 --> R3 --> R4
+    end
+    
+    ToggleActive --> RealTimeSync

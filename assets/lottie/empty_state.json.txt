@@ -1,0 +1,1 @@
+Placeholder for empty_state.json - replace with actual lottie animation

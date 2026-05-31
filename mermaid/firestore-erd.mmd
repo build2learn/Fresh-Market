@@ -1,0 +1,99 @@
+erDiagram
+    roles ||--o{ users : "has role"
+    users ||--o{ notifications : "receives"
+    categories ||--o{ products : "contains"
+    weight_units ||--o{ products : "measured in"
+    offers ||--o{ offer_products : "includes"
+    products ||--o{ offer_products : "included in"
+    
+    roles {
+        string id PK
+        string name
+        array permissions
+    }
+    
+    users {
+        string id PK
+        string email
+        string displayName
+        string phoneNumber
+        string roleId FK
+        bool isActive
+        timestamp createdAt
+        timestamp updatedAt
+        string fcmToken
+    }
+    
+    categories {
+        string id PK
+        string nameAr
+        string nameEn
+        string imageUrl
+        bool isVisible
+        number sortOrder
+        timestamp createdAt
+        timestamp updatedAt
+    }
+    
+    products {
+        string id PK
+        string nameAr
+        string nameEn
+        string descriptionAr
+        string descriptionEn
+        number price
+        number weight
+        string weightUnitId FK
+        string imageUrl
+        string categoryId FK
+        bool isFeatured
+        bool isAvailable
+        timestamp createdAt
+        timestamp updatedAt
+    }
+    
+    offers {
+        string id PK
+        string titleAr
+        string titleEn
+        string descriptionAr
+        string descriptionEn
+        string imageUrl
+        bool isActive
+        timestamp startDate
+        timestamp endDate
+        timestamp createdAt
+        timestamp updatedAt
+    }
+    
+    offer_products {
+        string id PK
+        string offerId FK
+        string productId FK
+        timestamp createdAt
+    }
+    
+    weight_units {
+        string id PK
+        string nameAr
+        string nameEn
+        string abbr
+        number sortOrder
+    }
+    
+    settings {
+        string id PK
+        any value
+        string type
+    }
+    
+    notifications {
+        string id PK
+        string userId FK
+        string title
+        string body
+        string type
+        map data
+        bool isRead
+        timestamp createdAt
+    }

@@ -1,0 +1,45 @@
+# Flutter
+.dart_tool/
+.packages
+build/
+*.iml
+*.ipr
+*.iws
+.idea/
+.android/
+.ios/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.lock
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
+firebase.json
+.firebaserc
+
+# Environment
+.env
+.env.*
+*.env
+
+# Generated
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependencies
+.pub-cache/
+.pub/
+
+# Coverage
+coverage/
+*.lcov

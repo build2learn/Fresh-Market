@@ -1,0 +1,55 @@
+flowchart TB
+    subgraph Presentation["Presentation Layer (Flutter + Riverpod)"]
+        UI[UI Widgets / Pages]
+        Providers[Riverpod Providers]
+        Routing[GoRouter Routing]
+    end
+    
+    subgraph Domain["Domain Layer (Pure Dart)"]
+        Entities[Entities]
+        RepoInterfaces["Repository Interfaces"]
+        UseCases[Use Cases]
+    end
+    
+    subgraph Data["Data Layer"]
+        RepoImpl["Repository Implementations"]
+        DTOs[DTOs]
+        FirebaseDS["Firebase Data Sources"]
+        LocalDS["Local Data Sources"]
+    end
+    
+    subgraph External["External Systems"]
+        Firestore[Cloud Firestore]
+        Auth[Firebase Auth]
+        Storage[Firebase Storage]
+        FCM[Firebase Cloud Messaging]
+    end
+    
+    UI --> Providers
+    Providers --> UseCases
+    UseCases --> RepoInterfaces
+    UseCases --> Entities
+    
+    RepoImpl --> RepoInterfaces
+    RepoImpl --> DTOs
+    RepoImpl --> FirebaseDS
+    RepoImpl --> LocalDS
+    
+    FirebaseDS --> Firestore
+    FirebaseDS --> Auth
+    FirebaseDS --> Storage
+    FirebaseDS --> FCM
+    LocalDS --> LocalCache[(Local Cache)]
+    
+    %% Dependency direction
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14 stroke-width:2px
+    
+    classDef presentation fill:#e1f5fe,stroke:#01579b
+    classDef domain fill:#f3e5f5,stroke:#7b1fa2
+    classDef data fill:#e8f5e9,stroke:#1b5e20
+    classDef external fill:#fff3e0,stroke:#e65100
+    
+    class UI,Providers,Routing presentation
+    class Entities,RepoInterfaces,UseCases domain
+    class RepoImpl,DTOs,FirebaseDS,LocalDS data
+    class Firestore,Auth,Storage,FCM,LocalCache external

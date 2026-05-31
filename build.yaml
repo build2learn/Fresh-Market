@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          explicit_to_json: true
+          include_if_null: false
+      freezed:
+        options:
+          make_collections_unmodifiable: false
+          union_key: type
+          union_value_case: snake
+      riverpod_generator:
+        options:
+          provider_scope: fresh_market

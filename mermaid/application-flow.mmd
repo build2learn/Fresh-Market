@@ -1,0 +1,47 @@
+flowchart TD
+    Start([User Opens App]) --> CheckAuth{Authenticated?}
+    
+    CheckAuth -->|No| SignIn[Sign In Page]
+    CheckAuth -->|Yes| LoadUser[Load User Profile]
+    
+    SignIn --> LoadUser
+    
+    LoadUser --> CheckRole{Role?}
+    
+    CheckRole -->|Customer| CustomerFlow[Customer Navigation]
+    CheckRole -->|Admin| AdminFlow[Admin Navigation]
+    
+    subgraph CustomerFlow [Customer App Flow]
+        Home[Home Screen] --> Browse
+        Home --> ViewOffers[View Offers]
+        Home --> ViewCategories[View Categories]
+        Home --> SearchProducts[Search Products]
+        
+        Browse --> ProductDetail[Product Detail]
+        ViewCategories --> ProductListByCat[Product List by Category]
+        ViewOffers --> OfferDetail[Offer Detail]
+        
+        ProductDetail --> AddToCart[Add to Cart]
+        ProductListByCat --> ProductDetail
+    end
+    
+    subgraph AdminFlow [Admin Dashboard Flow]
+        Dashboard[Admin Dashboard] --> ManageProducts[Product Management]
+        Dashboard --> ManageCategories[Category Management]
+        Dashboard --> ManageOffers[Offer Management]
+        Dashboard --> ManageUsers[User Management]
+        Dashboard --> ManageSettings[Settings Management]
+        
+        ManageProducts --> CRUDProducts[CRUD Products]
+        ManageCategories --> CRUDCategories[CRUD Categories]
+        ManageOffers --> CRUDOffers[CRUD Offers]
+        ManageUsers --> ViewUsers[View & Edit Users]
+        ManageSettings --> EditSettings[Edit Settings]
+    end
+    
+    CustomerFlow --> Firestore[Firestore Real-Time Sync]
+    AdminFlow --> Firestore
+    
+    Firestore --> Notify[Notify Connected Clients]
+    Notify --> CustomerFlow
+    Notify --> AdminFlow

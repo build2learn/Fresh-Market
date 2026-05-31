@@ -1,0 +1,72 @@
+flowchart TD
+    AdminLogin[Admin Login] --> Dashboard[Admin Dashboard]
+    
+    Dashboard --> Sidebar{Sidebar Navigation}
+    
+    Sidebar -->|Products| ProdMgmt[Product Management Page]
+    Sidebar -->|Categories| CatMgmt[Category Management Page]
+    Sidebar -->|Offers| OfferMgmt[Offer Management Page]
+    Sidebar -->|Users| UserMgmt[User Management Page]
+    Sidebar -->|Settings| SettingsMgmt[Settings Management Page]
+    
+    subgraph ProdMgmt [Product Management]
+        ProdList[Product List]
+        ProdList --> ProdAdd[Add Product Form]
+        ProdList --> ProdEdit[Edit Product Form]
+        ProdList --> ProdDelete[Delete Product]
+        ProdList --> ProdToggle[Toggle Availability]
+        
+        ProdAdd --> UploadImage[Upload Product Image]
+        ProdEdit --> UploadImage
+        ProdAdd --> SaveToFS[Save to Firestore]
+        ProdEdit --> SaveToFS
+    end
+    
+    subgraph CatMgmt [Category Management]
+        CatList[Category List]
+        CatList --> CatAdd[Add Category Form]
+        CatList --> CatEdit[Edit Category Form]
+        CatList --> CatToggleVis[Toggle Visibility]
+        CatList --> CatReorder[Drag & Drop Reorder]
+        
+        CatAdd --> UploadCatImage[Upload Category Image]
+        CatEdit --> UploadCatImage
+        CatAdd --> SaveCat[Save to Firestore]
+        CatEdit --> SaveCat
+        CatReorder --> SaveCatOrder[Save Sort Order]
+    end
+    
+    subgraph OfferMgmt [Offer Management]
+        OfferList[Offer List]
+        OfferList --> OfferAdd[Add Offer Form]
+        OfferList --> OfferEdit[Edit Offer Form]
+        OfferList --> OfferToggleAct[Toggle Active]
+        
+        OfferAdd --> UploadOfferImage[Upload Offer Image]
+        OfferEdit --> UploadOfferImage
+        OfferAdd --> SelectProducts[Select Offer Products]
+        OfferEdit --> SelectProducts
+        OfferAdd --> SaveOffer[Save to Firestore]
+        OfferEdit --> SaveOffer
+    end
+    
+    subgraph UserMgmt [User Management]
+        UserList[User List]
+        UserList --> ViewUser[View User Details]
+        ViewUser --> AssignRole[Change User Role]
+        ViewUser --> ToggleActive[Toggle Account Active]
+        
+        AssignRole --> SaveUser[Save to Firestore]
+        ToggleActive --> SaveUser
+    end
+    
+    subgraph SettingsMgmt [Settings Management]
+        WeightUnits[Weight Units Settings]
+        Lookups[Lookup Table Management]
+        
+        WeightUnits --> AddUnit[Add Weight Unit]
+        WeightUnits --> EditUnit[Edit Weight Unit]
+        WeightUnits --> DeleteUnit[Delete Weight Unit]
+        
+        Lookups --> ManageRoles[Manage Roles]
+    end

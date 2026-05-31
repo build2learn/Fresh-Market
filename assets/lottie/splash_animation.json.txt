@@ -1,0 +1,1 @@
+Placeholder for splash_animation.json - replace with actual lottie animation

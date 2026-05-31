@@ -1,0 +1,105 @@
+flowchart TD
+    AppLaunch([App Launch]) --> Splash[Splash Screen]
+    
+    Splash -->|Has auth| AuthGate{Auth State}
+    Splash -->|No auth| SignIn[Sign In Page]
+    
+    SignIn -->|Navigate| SignUp[Sign Up Page]
+    SignUp -->|Back| SignIn
+    SignIn -->|Success| AuthGate
+    
+    AuthGate -->|customer| CustomerShell[Customer Shell<br/>Bottom Navigation]
+    AuthGate -->|admin| AdminShell[Admin Shell<br/>Sidebar Navigation]
+    AuthGate -->|none| SignIn
+    
+    %% ── Customer Shell ──
+    CustomerShell --> Home[Home Page]
+    CustomerShell --> CatPage[Category Products Page]
+    CustomerShell --> SearchPage[Search Page]
+    CustomerShell --> NotifPage[Notification List Page]
+    CustomerShell --> ProfilePage[Profile Page]
+    
+    Home -->|Tap banner| BannerLink{Has deep link?}
+    BannerLink -->|Offer| OfferDetail[Offer Detail Page]
+    BannerLink -->|Product| ProdDetail[Product Detail Page]
+    BannerLink -->|None| Home
+    
+    Home -->|See All Offers| OfferList[Offer List Page]
+    Home -->|Tap Offer| OfferDetail
+    Home -->|Tap Category| CatPage
+    Home -->|See All Featured| ProdList[Product List Page]
+    Home -->|Tap Product| ProdDetail
+    
+    OfferList -->|Tap| OfferDetail
+    OfferDetail -->|Tap Product| ProdDetail
+    
+    CatPage -->|Tap Product| ProdDetail
+    ProdList -->|Tap Product| ProdDetail
+    
+    ProdDetail -->|Tap Category| CatPage
+    ProdDetail -->|Tap Offer| OfferDetail
+    
+    SearchPage -->|Tap Result| ProdDetail
+    NotifPage -->|Tap| NLink{Deep link?}
+    NLink -->|Offer| OfferDetail
+    NLink -->|Product| ProdDetail
+    NLink -->|None| NotifPage
+    
+    ProfilePage -->|Sign Out| SignIn
+    ProfilePage -->|Settings| SettingsPage[Settings Page]
+
+    %% ── Admin Shell ──
+    AdminShell --> Dashboard[Admin Dashboard]
+    AdminShell --> AdminProds[Admin Products]
+    AdminShell --> AdminCats[Admin Categories]
+    AdminShell --> AdminOffers[Admin Offers]
+    AdminShell --> AdminBanners[Admin Banners]
+    AdminShell --> AdminUsers[Admin Users]
+    AdminShell --> AdminSettings[Admin Settings]
+    
+    Dashboard -->|Quick Add| ProdForm[Product Form]
+    Dashboard -->|Quick Add| CatForm[Category Form]
+    Dashboard -->|Quick Add| OfferForm[Offer Form]
+    
+    AdminProds -->|Add / Edit| ProdForm
+    AdminProds -->|Delete| ConfirmDel{Confirm?}
+    ConfirmDel -->|Yes| AdminProds
+    ConfirmDel -->|No| AdminProds
+    ProdForm -->|Save| AdminProds
+    
+    AdminCats -->|Add / Edit| CatForm
+    CatForm -->|Save| AdminCats
+    
+    AdminOffers -->|Add / Edit| OfferForm
+    OfferForm -->|Save| AdminOffers
+    
+    AdminBanners -->|Add / Edit| BannerForm[Banner Form]
+    BannerForm -->|Save| AdminBanners
+    
+    AdminUsers -->|Edit Role| UserDialog[User Detail Dialog]
+    UserDialog -->|Save| AdminUsers
+    
+    AdminSettings -->|Edit| AdminSettings
+    
+    %% ── Cross-role ──
+    AdminProds -.->|View as customer| ProdDetail
+    AdminCats -.->|View as customer| CatPage
+    AdminOffers -.->|View as customer| OfferDetail
+
+    %% ── Legend ──
+    subgraph Legend
+        L1[Page Screen]
+        L2{Decision Point}
+        L3([App Entry])
+        L4 -.->|Optional flow| L5
+    end
+    
+    classDef customer fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px
+    classDef admin fill:#FFF3E0,stroke:#FF6F00,stroke-width:2px
+    classDef shared fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
+    classDef entry fill:#F3E5F5,stroke:#7B1FA2,stroke-width:3px
+    
+    class Home,CatPage,SearchPage,NotifPage,ProfilePage,OfferList,OfferDetail,ProdDetail,ProdList customer
+    class Dashboard,AdminProds,AdminCats,AdminOffers,AdminBanners,AdminUsers,AdminSettings,ProdForm,CatForm,OfferForm,BannerForm,UserDialog,ConfirmDel admin
+    class SignIn,SignUp,Splash,SettingsPage shared
+    class AppLaunch entry

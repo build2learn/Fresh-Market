@@ -1,0 +1,66 @@
+flowchart TD
+    Start([Admin selects Category Management])
+    
+    Start --> LoadCats[Load categories from Firestore]
+    LoadCats --> CatList[Display Categories List]
+    
+    CatList --> Action{Choose Action}
+    
+    Action -->|Create| CreateCat[Create Category Flow]
+    Action -->|Edit| EditCat[Edit Category Flow]
+    Action -->|Toggle Visibility| ToggleVis[Toggle Hide/Show]
+    Action -->|Reorder| ReorderCat[Drag & Drop Reorder]
+    Action -->|Delete| DeleteCat[Delete Category]
+    
+    subgraph CreateCat [Create Category]
+        A1[Show Category Form]
+        A2[Enter Arabic Name]
+        A3[Enter English Name]
+        A4[Upload Category Image]
+        A5[Set Sort Order]
+        A6[Set Visibility]
+        A7[Validate Input]
+        A8{Valid?}
+        A9[Save to Firestore]
+        A10[Show Error]
+        
+        A1 --> A2 --> A3 --> A4 --> A5 --> A6 --> A7 --> A8
+        A8 -->|Yes| A9
+        A8 -->|No| A10
+    end
+    
+    subgraph ReorderCat [Reordering]
+        R1[Drag category to new position]
+        R2[Update sortOrder values]
+        R3[Batch update to Firestore]
+        
+        R1 --> R2 --> R3
+    end
+    
+    subgraph RealTimeSync [Real-Time Sync]
+        RS1[Firestore document changed]
+        RS2[Category snapshot listener triggered]
+        RS3[StreamProvider emits new list]
+        RS4[All connected clients rebuild]
+        
+        RS1 --> RS2 --> RS3 --> RS4
+    end
+    
+    subgraph CustomerImpact [Customer Impact]
+        CI1[Category visibility changes]
+        CI2[Hidden categories disappear]
+        CI3[Visible categories appear]
+        CI4[Reorder reflected in navigation]
+        
+        CI1 --> CI2
+        CI1 --> CI3
+        CI1 --> CI4
+    end
+    
+    A9 --> RealTimeSync
+    EditCat --> RealTimeSync
+    ToggleVis --> RealTimeSync
+    R3 --> RealTimeSync
+    
+    RealTimeSync --> CatList
+    RealTimeSync --> CustomerImpact

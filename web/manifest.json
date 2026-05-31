@@ -1,0 +1,10 @@
+{
+  "name": "Fresh Market",
+  "short_name": "Fresh Market",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2E7D32",
+  "description": "Product Catalog & Pricing Management Platform",
+  "orientation": "portrait-primary"
+}

@@ -1,0 +1,22 @@
+C4Context
+title System Context Diagram - Fresh Market Platform
+
+Person(customer, "Customer", "End user browsing products, offers, and categories")
+Person(admin, "Admin", "Staff member managing catalog and offers")
+
+System(freshMarketApp, "Fresh Market App", "Flutter application serving Android, iOS, and Web clients")
+
+System_Ext(firebaseAuth, "Firebase Authentication", "User authentication and authorization")
+System_Ext(firestore, "Cloud Firestore", "Real-time NoSQL database")
+System_Ext(firebaseStorage, "Firebase Storage", "Product and category image storage")
+System_Ext(fcm, "Firebase Cloud Messaging", "Push notifications")
+
+Rel(customer, freshMarketApp, "Browses products, offers, categories")
+Rel(admin, freshMarketApp, "Manages catalog, offers, users")
+
+Rel(freshMarketApp, firebaseAuth, "Authenticates users")
+Rel(freshMarketApp, firestore, "Reads/writes real-time data")
+Rel(freshMarketApp, firebaseStorage, "Uploads/downloads images")
+Rel(freshMarketApp, fcm, "Receives push notifications")
+
+UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")

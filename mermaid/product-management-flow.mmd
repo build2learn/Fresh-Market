@@ -1,0 +1,48 @@
+flowchart TD
+    Start([Admin selects Product Management])
+    
+    Start --> LoadProducts[Load products from Firestore]
+    LoadProducts --> ProdList[Display Products List]
+    
+    ProdList --> Action{Choose Action}
+    
+    Action -->|Create| CreateProd[Create Product Flow]
+    Action -->|Edit| EditProd[Edit Product Flow]
+    Action -->|Delete| DeleteProd[Delete Product Flow]
+    Action -->|Toggle Availability| ToggleAvail[Toggle Availability]
+    Action -->|Toggle Featured| ToggleFeat[Toggle Featured]
+    
+    subgraph CreateProd [Create Product]
+        A1[Show Product Form]
+        A2[Enter Arabic Name & Description]
+        A3[Enter English Name & Description]
+        A4[Enter Price, Weight, Weight Unit]
+        A5[Select Category]
+        A6[Upload Product Image]
+        A7[Set Featured & Availability]
+        A8[Validate Input]
+        A9{Validation Passed?}
+        A10[Save to Firestore]
+        A11[Show Error]
+        
+        A1 --> A2 --> A3 --> A4 --> A5 --> A6 --> A7 --> A8 --> A9
+        A9 -->|Yes| A10
+        A9 -->|No| A11
+    end
+    
+    subgraph RealTimeSync [Real-Time Sync]
+        R1[Firestore document changed]
+        R2[Snapshot listener triggered]
+        R3[StreamProvider emits new list]
+        R4[All connected clients rebuild]
+        
+        R1 --> R2 --> R3 --> R4
+    end
+    
+    A10 --> RealTimeSync
+    ToggleAvail --> RealTimeSync
+    ToggleFeat --> RealTimeSync
+    DeleteProd --> RealTimeSync
+    
+    RealTimeSync --> ProdList
+    RealTimeSync --> RefreshUserUI[Customer Home Screen Updates]

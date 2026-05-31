@@ -1,0 +1,39 @@
+sequenceDiagram
+    actor User
+    participant App as Flutter App
+    participant Auth as Firebase Auth
+    participant FS as Firestore
+    participant DB as Roles Collection
+    
+    User->>App: Enter Email & Password
+    App->>Auth: signInWithEmailAndPassword()
+    Auth-->>App: UserCredential
+    
+    alt Sign In Success
+        App->>FS: Fetch user document (uid)
+        FS-->>App: User data (roleId ref)
+        App->>DB: Fetch role document
+        DB-->>App: Role (admin/customer)
+        
+        alt Admin Role
+            App->>App: Navigate to Admin Dashboard
+        else Customer Role
+            App->>App: Navigate to Home Screen
+        end
+        
+        App->>User: Display authenticated UI
+    else Sign In Failed
+        Auth-->>App: FirebaseAuthException
+        App->>User: Show localized error
+    end
+    
+    User->>App: Request Sign Out
+    App->>Auth: signOut()
+    Auth-->>App: Success
+    App->>App: Clear user state
+    App->>User: Navigate to Sign In
+    
+    Note over App,Auth: Auth state listener triggers on all changes
+    App->>Auth: authStateChanges() listener
+    Auth-->>App: Auth state (null/user)
+    App->>App: Handle route redirects

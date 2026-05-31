@@ -1,0 +1,91 @@
+{
+  "categories": [
+    { "nameAr": "خضروات", "nameEn": "Vegetables", "isVisible": true, "sortOrder": 1 },
+    { "nameAr": "فواكه", "nameEn": "Fruits", "isVisible": true, "sortOrder": 2 },
+    { "nameAr": "لحوم", "nameEn": "Meat", "isVisible": true, "sortOrder": 3 },
+    { "nameAr": "دواجن", "nameEn": "Poultry", "isVisible": true, "sortOrder": 4 },
+    { "nameAr": "أسماك", "nameEn": "Seafood", "isVisible": true, "sortOrder": 5 },
+    { "nameAr": "ألبان وبيض", "nameEn": "Dairy & Eggs", "isVisible": true, "sortOrder": 6 },
+    { "nameAr": "مخبوزات", "nameEn": "Bakery", "isVisible": true, "sortOrder": 7 },
+    { "nameAr": "مشروبات", "nameEn": "Beverages", "isVisible": true, "sortOrder": 8 },
+    { "nameAr": "حلويات", "nameEn": "Sweets & Desserts", "isVisible": true, "sortOrder": 9 },
+    { "nameAr": "بهارات", "nameEn": "Spices", "isVisible": true, "sortOrder": 10 },
+    { "nameAr": "زيوت وصلصات", "nameEn": "Oils & Sauces", "isVisible": true, "sortOrder": 11 },
+    { "nameAr": "أرز وحبوب", "nameEn": "Rice & Grains", "isVisible": true, "sortOrder": 12 },
+    { "nameAr": "معلبات", "nameEn": "Canned Food", "isVisible": true, "sortOrder": 13 },
+    { "nameAr": "مجمدة", "nameEn": "Frozen Food", "isVisible": true, "sortOrder": 14 },
+    { "nameAr": "عناية شخصية", "nameEn": "Personal Care", "isVisible": true, "sortOrder": 15 }
+  ],
+  "weightUnits": [
+    { "id": "kg", "nameAr": "كيلو جرام", "nameEn": "Kilogram", "abbr": "كجم", "sortOrder": 1 },
+    { "id": "g", "nameAr": "جرام", "nameEn": "Gram", "abbr": "جم", "sortOrder": 2 },
+    { "id": "lb", "nameAr": "رطل", "nameEn": "Pound", "abbr": "رطل", "sortOrder": 3 },
+    { "id": "l", "nameAr": "لتر", "nameEn": "Liter", "abbr": "لتر", "sortOrder": 4 },
+    { "id": "ml", "nameAr": "ملليلتر", "nameEn": "Milliliter", "abbr": "مل", "sortOrder": 5 },
+    { "id": "piece", "nameAr": "قطعة", "nameEn": "Piece", "abbr": "قطعة", "sortOrder": 6 },
+    { "id": "pack", "nameAr": "علبة", "nameEn": "Pack", "abbr": "علبة", "sortOrder": 7 }
+  ],
+  "products": [
+    { "nameAr": "طماطم", "nameEn": "Tomatoes", "descriptionAr": "طماطم طازجة من أفضل المزارع المحلية", "descriptionEn": "Fresh tomatoes from local farms", "price": 4.50, "weight": 1.0, "weightUnitId": "kg", "categoryNameEn": "Vegetables", "isFeatured": true, "isAvailable": true },
+    { "nameAr": "خيار", "nameEn": "Cucumbers", "descriptionAr": "خيار طازج مقرمش", "descriptionEn": "Fresh crunchy cucumbers", "price": 3.00, "weight": 1.0, "weightUnitId": "kg", "categoryNameEn": "Vegetables", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "بصل أحمر", "nameEn": "Red Onions", "descriptionAr": "بصل أحمر طازج", "descriptionEn": "Fresh red onions", "price": 2.50, "weight": 1.0, "weightUnitId": "kg", "categoryNameEn": "Vegetables", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "تفاح أحمر", "nameEn": "Red Apples", "descriptionAr": "تفاح أحمر فاخر مستورد من أمريكا", "descriptionEn": "Premium red apples imported from USA", "price": 8.00, "weight": 1.0, "weightUnitId": "kg", "categoryNameEn": "Fruits", "isFeatured": true, "isAvailable": true },
+    { "nameAr": "موز", "nameEn": "Bananas", "descriptionAr": "موز طازج من الفلبين", "descriptionEn": "Fresh bananas from Philippines", "price": 5.00, "weight": 1.0, "weightUnitId": "kg", "categoryNameEn": "Fruits", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "برتقال", "nameEn": "Oranges", "descriptionAr": "برتقال بلدي عصير", "descriptionEn": "Juicy local oranges", "price": 4.00, "weight": 1.0, "weightUnitId": "kg", "categoryNameEn": "Fruits", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "لحم بقري مفروم", "nameEn": "Ground Beef", "descriptionAr": "لحم بقري طازج مفروم ناعم", "descriptionEn": "Fresh ground beef", "price": 42.00, "weight": 1.0, "weightUnitId": "kg", "categoryNameEn": "Meat", "isFeatured": true, "isAvailable": true },
+    { "nameAr": "استيك بقري", "nameEn": "Beef Steak", "descriptionAr": "استيك بقري طري عالي الجودة", "descriptionEn": "Tender high-quality beef steak", "price": 65.00, "weight": 1.0, "weightUnitId": "kg", "categoryNameEn": "Meat", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "دجاج كامل", "nameEn": "Whole Chicken", "descriptionAr": "دجاج طازج كامل الوزن", "descriptionEn": "Fresh whole chicken", "price": 22.00, "weight": 1.0, "weightUnitId": "kg", "categoryNameEn": "Poultry", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "صدر دجاج", "nameEn": "Chicken Breast", "descriptionAr": "صدر دجاج طازج خالي من العظم والجلد", "descriptionEn": "Fresh boneless skinless chicken breast", "price": 35.00, "weight": 1.0, "weightUnitId": "kg", "categoryNameEn": "Poultry", "isFeatured": true, "isAvailable": true },
+    { "nameAr": "سلمون نرويجي", "nameEn": "Norwegian Salmon", "descriptionAr": "سلمون نرويجي طازج مدخن", "descriptionEn": "Fresh smoked Norwegian salmon", "price": 85.00, "weight": 1.0, "weightUnitId": "kg", "categoryNameEn": "Seafood", "isFeatured": true, "isAvailable": true },
+    { "nameAr": "جمبري كبير", "nameEn": "Jumbo Shrimp", "descriptionAr": "جمبري كبير الحجم طازج", "descriptionEn": "Fresh jumbo shrimp", "price": 55.00, "weight": 1.0, "weightUnitId": "kg", "categoryNameEn": "Seafood", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "حليب طازج", "nameEn": "Fresh Milk", "descriptionAr": "حليب طازج كامل الدسم", "descriptionEn": "Full cream fresh milk", "price": 6.00, "weight": 1.0, "weightUnitId": "l", "categoryNameEn": "Dairy & Eggs", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "بيض بلدي", "nameEn": "Free-Range Eggs", "descriptionAr": "بيض بلدي طازج 30 حبة", "descriptionEn": "Fresh free-range eggs 30-pack", "price": 18.00, "weight": 30.0, "weightUnitId": "piece", "categoryNameEn": "Dairy & Eggs", "isFeatured": true, "isAvailable": true },
+    { "nameAr": "جبنة فيتا", "nameEn": "Feta Cheese", "descriptionAr": "جبنة فيتا يونانية مالحة", "descriptionEn": "Salty Greek feta cheese", "price": 15.00, "weight": 400.0, "weightUnitId": "g", "categoryNameEn": "Dairy & Eggs", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "خبز عربي كبير", "nameEn": "Large Pita Bread", "descriptionAr": "خبز عربي طازج 6 حبات", "descriptionEn": "Fresh pita bread 6 pieces", "price": 3.50, "weight": 6.0, "weightUnitId": "piece", "categoryNameEn": "Bakery", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "كرواسون", "nameEn": "Croissant", "descriptionAr": "كرواسون فرنسي طري بالزبدة", "descriptionEn": "Soft French butter croissant", "price": 2.50, "weight": 1.0, "weightUnitId": "piece", "categoryNameEn": "Bakery", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "مياه معدنية", "nameEn": "Mineral Water", "descriptionAr": "مياه معدنية طبيعية 1.5 لتر", "descriptionEn": "Natural mineral water 1.5L", "price": 1.50, "weight": 1.5, "weightUnitId": "l", "categoryNameEn": "Beverages", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "عصير برتقال طبيعي", "nameEn": "Fresh Orange Juice", "descriptionAr": "عصير برتقال طبيعي 100%", "descriptionEn": "100% natural orange juice", "price": 7.00, "weight": 1.0, "weightUnitId": "l", "categoryNameEn": "Beverages", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "تمور سكري", "nameEn": "Sukari Dates", "descriptionAr": "تمور سكري ملكي فاخرة من القصيم", "descriptionEn": "Premium Sukari dates from Qassim", "price": 35.00, "weight": 1.0, "weightUnitId": "kg", "categoryNameEn": "Sweets & Desserts", "isFeatured": true, "isAvailable": true },
+    { "nameAr": "عسل سدر جبلي", "nameEn": "Mountain Sidr Honey", "descriptionAr": "عسل سدر جبلي طبيعي 100%", "descriptionEn": "100% natural mountain Sidr honey", "price": 120.00, "weight": 500.0, "weightUnitId": "g", "categoryNameEn": "Sweets & Desserts", "isFeatured": true, "isAvailable": true },
+    { "nameAr": "زيت زيتون بكر", "nameEn": "Extra Virgin Olive Oil", "descriptionAr": "زيت زيتون بكر ممتاز عضوي", "descriptionEn": "Organic extra virgin olive oil", "price": 45.00, "weight": 750.0, "weightUnitId": "ml", "categoryNameEn": "Oils & Sauces", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "أرز بسمتي هندي", "nameEn": "Indian Basmati Rice", "descriptionAr": "أرز بسمتي هندي فاخر طويل الحبة", "descriptionEn": "Premium long-grain Indian Basmati rice", "price": 25.00, "weight": 5.0, "weightUnitId": "kg", "categoryNameEn": "Rice & Grains", "isFeatured": true, "isAvailable": true },
+    { "nameAr": "فول مدمس", "nameEn": "Fava Beans", "descriptionAr": "فول مدمس معلب جاهز", "descriptionEn": "Canned ready-to-eat fava beans", "price": 4.50, "weight": 400.0, "weightUnitId": "g", "categoryNameEn": "Canned Food", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "تونة بالزيت", "nameEn": "Tuna in Oil", "descriptionAr": "تونة بالزيت النباتي شرائح", "descriptionEn": "Tuna chunks in vegetable oil", "price": 6.00, "weight": 185.0, "weightUnitId": "g", "categoryNameEn": "Canned Food", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "خضار مشكلة مجمدة", "nameEn": "Frozen Mixed Vegetables", "descriptionAr": "خضار مشكلة مجمدة (بازلاء، جزر، ذرة)", "descriptionEn": "Frozen mixed vegetables (peas, carrots, corn)", "price": 8.00, "weight": 1.0, "weightUnitId": "kg", "categoryNameEn": "Frozen Food", "isFeatured": false, "isAvailable": true },
+    { "nameAr": "صابون يد سائل", "nameEn": "Liquid Hand Soap", "descriptionAr": "صابون يد سائل معقم برائحة اللافندر", "descriptionEn": "Antibacterial liquid hand soap lavender scent", "price": 12.00, "weight": 500.0, "weightUnitId": "ml", "categoryNameEn": "Personal Care", "isFeatured": false, "isAvailable": true }
+  ],
+  "offers": [
+    {
+      "titleAr": "تخفيضات الصيف",
+      "titleEn": "Summer Sale",
+      "descriptionAr": "تخفيضات كبيرة على الفواكه والخضروات الطازجة",
+      "descriptionEn": "Big discounts on fresh fruits and vegetables",
+      "isActive": true,
+      "durationDays": 14
+    },
+    {
+      "titleAr": "عرض اللحوم الطازجة",
+      "titleEn": "Fresh Meat Offer",
+      "descriptionAr": "خصم 20% على جميع أنواع اللحوم الطازجة",
+      "descriptionEn": "20% off on all fresh meat",
+      "isActive": true,
+      "durationDays": 14
+    },
+    {
+      "titleAr": "عرض الألبان",
+      "titleEn": "Dairy Deal",
+      "descriptionAr": "اشتر 2 واحصل على 1 مجاناً من منتجات الألبان",
+      "descriptionEn": "Buy 2 Get 1 Free on all dairy products",
+      "isActive": true,
+      "durationDays": 7
+    },
+    {
+      "titleAr": "العسل والتمور",
+      "titleEn": "Honey & Dates",
+      "descriptionAr": "خصم 15% على جميع أنواع العسل والتمور",
+      "descriptionEn": "15% off on all honey and dates",
+      "isActive": false,
+      "durationDays": 14
+    }
+  ]
+}
