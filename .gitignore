@@ -1,45 +1,95 @@
+# ======================
 # Flutter
+# ======================
 .dart_tool/
 .packages
 build/
 *.iml
 *.ipr
 *.iws
-.idea/
 .android/
 .ios/
 .flutter-plugins
 .flutter-plugins-dependencies
-*.lock
 
+# ======================
 # Firebase
+# ======================
 google-services.json
 GoogleService-Info.plist
-firebase.json
-.firebaserc
+service-account.json
+serviceAccount.json
+*.jks
+*.keystore
 
+# ======================
 # Environment
+# ======================
 .env
 .env.*
 *.env
 
-# Generated
+# ======================
+# Generated Code (build_runner output)
+# ======================
 *.g.dart
 *.freezed.dart
 *.mocks.dart
 
+# ======================
+# FlutterFire CLI generated config (real credentials per-device)
+# ======================
+firebase_options.dart
+
+# ======================
+# Flutter Generated Platform Files (local paths, machine-specific)
+# ======================
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Runner/GeneratedPluginRegistrant.h
+ios/Runner/GeneratedPluginRegistrant.m
+android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+web/flutter_bootstrap.js
+app.*.map.js
+app.*.map
+
+# ======================
+# Local Config (machine-specific paths)
+# ======================
+android/local.properties
+ios/Flutter/Debug.xcconfig
+ios/Flutter/Release.xcconfig
+
+# ======================
 # IDE
+# ======================
 .vscode/
 .idea/
 
+# ======================
 # OS
+# ======================
 .DS_Store
 Thumbs.db
 
+# ======================
 # Dependencies
+# ======================
 .pub-cache/
 .pub/
 
+# ======================
 # Coverage
+# ======================
 coverage/
 *.lcov
+
+# ======================
+# Misc
+# ======================
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+.DartDefinitions

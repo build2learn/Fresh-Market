@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:fresh_market/core/errors/app_exception.dart';
 import 'package:fresh_market/core/utils/result.dart';
@@ -77,17 +78,23 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Result<UserEntity?>> getCurrentUser() async {
     try {
       final authUser = _firebaseDataSource.currentUser;
+      debugPrint('[AuthRepo] getCurrentUser: authUser=${authUser?.uid ?? "null"}');
       if (authUser == null) {
         await _localDataSource.clearCache();
+        debugPrint('[AuthRepo] getCurrentUser: no user cached');
         return const Success(null);
       }
+      debugPrint('[AuthRepo] getCurrentUser: fetching Firestore doc for ${authUser.uid}');
       final userData = await _firebaseDataSource.getUserData(authUser.uid);
       if (userData != null) {
         final dto = UserDto.fromMap(userData, authUser.uid);
+        debugPrint('[AuthRepo] getCurrentUser: user doc found');
         return Success(UserModel.fromDto(dto).toEntity());
       }
+      debugPrint('[AuthRepo] getCurrentUser: no Firestore doc for ${authUser.uid}');
       return const Success(null);
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('[AuthRepo] getCurrentUser error: $e\n$st');
       return Failure(AuthException(message: 'Failed to get current user'));
     }
   }
@@ -95,16 +102,26 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Stream<UserEntity?> watchAuthState() {
     return _firebaseDataSource.watchAuthState().asyncMap((authUser) async {
-      if (authUser == null) {
-        await _localDataSource.clearCache();
+      try {
+        if (authUser == null) {
+          debugPrint('[AuthRepo] watchAuthState: no user, clearing cache');
+          await _localDataSource.clearCache();
+          return null;
+        }
+        debugPrint('[AuthRepo] watchAuthState: user=${authUser.uid}, fetching user data');
+        final userData = await _firebaseDataSource.getUserData(authUser.uid);
+        if (userData != null) {
+          final dto = UserDto.fromMap(userData, authUser.uid);
+          final entity = UserModel.fromDto(dto).toEntity();
+          debugPrint('[AuthRepo] watchAuthState: user data found for ${authUser.uid}');
+          return entity;
+        }
+        debugPrint('[AuthRepo] watchAuthState: no user document for ${authUser.uid}');
+        return null;
+      } catch (e, st) {
+        debugPrint('[AuthRepo] watchAuthState error: $e\n$st');
         return null;
       }
-      final userData = await _firebaseDataSource.getUserData(authUser.uid);
-      if (userData != null) {
-        final dto = UserDto.fromMap(userData, authUser.uid);
-        return UserModel.fromDto(dto).toEntity();
-      }
-      return null;
     });
   }
 

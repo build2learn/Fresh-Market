@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,12 +10,16 @@ class AdminGuard {
   AdminGuard(this._ref);
 
   String? call(BuildContext context, GoRouterState state) {
-    final isAdmin = _ref.read(isAdminProvider);
+    final authState = _ref.read(authNotifierProvider);
+    final isAdmin = authState.isAdmin;
+    debugPrint('[AdminGuard] Checking: location=${state.matchedLocation}, isAdmin=$isAdmin, authStatus=${authState.status}');
 
     if (!isAdmin) {
+      debugPrint('[AdminGuard] Redirecting non-admin to home');
       return '/home';
     }
 
+    debugPrint('[AdminGuard] Allowing admin access');
     return null;
   }
 }

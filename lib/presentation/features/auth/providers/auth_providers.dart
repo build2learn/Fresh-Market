@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fresh_market/core/utils/result.dart';
 import 'package:fresh_market/data/providers/auth_repository_provider.dart';
@@ -87,17 +89,51 @@ class AuthNotifier extends StateNotifier<AuthState> {
     _init();
   }
 
+  StreamSubscription<UserEntity?>? _authSubscription;
+
   void _init() {
-    _watchAuthState.call().listen((user) {
-      if (user != null) {
+    debugPrint('[AuthNotifier] Subscribing to auth state stream');
+
+    _authSubscription = _watchAuthState.call().listen(
+      (user) {
+        if (user != null) {
+          debugPrint('[AuthNotifier] Auth state: authenticated as ${user.id}');
+          state = AuthState(
+            status: AuthStatus.authenticated,
+            user: user,
+          );
+        } else {
+          debugPrint('[AuthNotifier] Auth state: unauthenticated');
+          state = const AuthState(status: AuthStatus.unauthenticated);
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        debugPrint('[AuthNotifier] Auth stream error: $error');
         state = AuthState(
-          status: AuthStatus.authenticated,
-          user: user,
+          status: AuthStatus.unauthenticated,
+          errorMessage: error.toString(),
         );
-      } else {
+      },
+      onDone: () {
+        debugPrint('[AuthNotifier] Auth stream closed');
+        if (state.status == AuthStatus.uninitialized) {
+          state = const AuthState(status: AuthStatus.unauthenticated);
+        }
+      },
+    );
+
+    Future.delayed(const Duration(seconds: 5), () {
+      if (state.status == AuthStatus.uninitialized) {
+        debugPrint('[AuthNotifier] Stream timeout - forcing unauthenticated');
         state = const AuthState(status: AuthStatus.unauthenticated);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> signIn(String email, String password) async {
@@ -155,6 +191,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 }
 
 final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+  debugPrint('[AuthNotifierProvider] Creating AuthNotifier');
   return AuthNotifier(
     watchAuthState: ref.watch(watchAuthStateUseCaseProvider),
     signIn: ref.watch(signInUseCaseProvider),

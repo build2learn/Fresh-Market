@@ -8,7 +8,7 @@ import '../../domain/repositories/offer_repository.dart';
 import '../datasources/firebase/offer_firebase_datasource.dart';
 import '../datasources/local/offer_local_datasource.dart';
 import '../models/offer_model.dart';
-import '../models/product_model.dart';
+
 
 class OfferRepositoryImpl implements OfferRepository {
   final OfferFirebaseDataSource _firebaseDataSource;

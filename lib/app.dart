@@ -1,9 +1,13 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fresh_market/l10n/app_localizations.dart';
 
+import 'package:fresh_market/core/providers/firebase_providers.dart';
 import 'package:fresh_market/core/providers/locale_provider.dart';
+import 'package:fresh_market/core/services/bootstrap.dart';
 import 'package:fresh_market/core/theme/app_theme.dart';
 import 'package:fresh_market/presentation/routing/app_router.dart';
 
@@ -20,19 +24,67 @@ class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
   @override
   void initState() {
     super.initState();
-    _initLocale();
+    debugPrint('[App] initState - starting locale initialization');
+    _initLocaleWithTimeout();
   }
 
-  Future<void> _initLocale() async {
-    await ref.read(localeProvider.notifier).load();
+  Future<void> _initLocaleWithTimeout() async {
+    try {
+      await ref.read(localeProvider.notifier).load().timeout(const Duration(seconds: 5));
+      debugPrint('[App] _initLocale - locale loaded');
+    } on TimeoutException {
+      debugPrint('[App] _initLocale TIMEOUT after 5s - continuing anyway');
+    } catch (e, st) {
+      debugPrint('[App] _initLocale error: $e\n$st');
+    }
     if (mounted) {
       setState(() => _initialized = true);
+      debugPrint('[App] _initialized forced to true');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final firebaseResult = ref.watch(firebaseInitResultProvider);
+    if (!firebaseResult.isSuccess) {
+      debugPrint('[App] Showing Firebase error screen');
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.cloud_off, size: 64, color: Theme.of(context).colorScheme.error),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Firebase initialization failed',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    firebaseResult.error ?? 'Unknown error',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: () => Bootstrap.run(),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     if (!_initialized) {
+      debugPrint('[App] Build: waiting for locale initialization');
       return const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
@@ -41,10 +93,12 @@ class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
       );
     }
 
+    debugPrint('[App] Build: creating router');
     final locale = ref.watch(localeProvider);
     final isArabic = locale.languageCode == 'ar';
     final router = ref.watch(goRouterProvider);
 
+    debugPrint('[App] Build: app ready');
     return MaterialApp.router(
       title: 'Fresh Market',
       debugShowCheckedModeBanner: false,
@@ -78,3 +132,4 @@ class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
     );
   }
 }
+

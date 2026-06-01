@@ -14,16 +14,6 @@ final _getOffersUseCaseProvider = Provider<GetOffersUseCase>((ref) {
   return GetOffersUseCase(repository: repo);
 });
 
-final _getActiveOffersUseCaseProvider = Provider<GetActiveOffersUseCase>((ref) {
-  final repo = ref.watch(offerRepositoryProvider);
-  return GetActiveOffersUseCase(repository: repo);
-});
-
-final _getOfferUseCaseProvider = Provider<GetOfferUseCase>((ref) {
-  final repo = ref.watch(offerRepositoryProvider);
-  return GetOfferUseCase(repository: repo);
-});
-
 final _createOfferUseCaseProvider = Provider<CreateOfferUseCase>((ref) {
   final repo = ref.watch(offerRepositoryProvider);
   return CreateOfferUseCase(repository: repo);
