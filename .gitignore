@@ -21,6 +21,8 @@ service-account.json
 serviceAccount.json
 *.jks
 *.keystore
+*.p12
+*.pem
 
 # ======================
 # Environment

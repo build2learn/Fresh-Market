@@ -5,6 +5,7 @@ abstract final class RouteConstants {
   static const String forgotPassword = '/forgot-password';
 
   static const String home = '/home';
+  static const String categoryList = '/categories/list';
   static const String categoryProducts = '/categories/:id';
   static const String productDetail = '/products/:id';
   static const String offerList = '/offers';
@@ -30,6 +31,7 @@ abstract final class RouteConstants {
   static const String adminUsers = '/admin/users';
   static const String adminSettings = '/admin/settings';
 
+  static String get categoryListPath => '/categories/list';
   static String categoryProductsPath(String id) => '/categories/$id';
   static String productDetailPath(String id) => '/products/$id';
   static String offerDetailPath(String id) => '/offers/$id';

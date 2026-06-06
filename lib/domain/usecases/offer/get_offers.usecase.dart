@@ -1,5 +1,6 @@
 import 'package:fresh_market/core/utils/result.dart';
 import 'package:fresh_market/domain/entities/offer.entity.dart';
+import 'package:fresh_market/domain/entities/product.entity.dart';
 import 'package:fresh_market/domain/repositories/offer_repository.dart';
 
 class GetOffersUseCase {
@@ -41,7 +42,7 @@ class GetOfferProductsUseCase {
   GetOfferProductsUseCase({required OfferRepository repository})
       : _repository = repository;
 
-  Future<Result<List<dynamic>>> call(String offerId) {
+  Future<Result<List<ProductEntity>>> call(String offerId) {
     return _repository.getOfferProducts(offerId);
   }
 }

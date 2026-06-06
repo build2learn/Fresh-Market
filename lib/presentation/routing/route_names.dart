@@ -5,6 +5,7 @@ abstract final class RouteNames {
   static const String forgotPassword = 'forgotPassword';
 
   static const String home = 'home';
+  static const String categoriesList = 'categoriesList';
   static const String categoryProducts = 'categoryProducts';
   static const String productDetail = 'productDetail';
   static const String offerList = 'offerList';

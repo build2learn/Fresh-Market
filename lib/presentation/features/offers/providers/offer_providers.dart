@@ -39,6 +39,21 @@ final _watchActiveOffersUseCaseProvider = Provider<WatchActiveOffersUseCase>((re
   return WatchActiveOffersUseCase(repository: repo);
 });
 
+final getActiveOffersUseCaseProvider = Provider<GetActiveOffersUseCase>((ref) {
+  final repo = ref.watch(offerRepositoryProvider);
+  return GetActiveOffersUseCase(repository: repo);
+});
+
+final getOfferUseCaseProvider = Provider<GetOfferUseCase>((ref) {
+  final repo = ref.watch(offerRepositoryProvider);
+  return GetOfferUseCase(repository: repo);
+});
+
+final getOfferProductsUseCaseProvider = Provider<GetOfferProductsUseCase>((ref) {
+  final repo = ref.watch(offerRepositoryProvider);
+  return GetOfferProductsUseCase(repository: repo);
+});
+
 final offerListProvider =
     StateNotifierProvider<OfferListNotifier, OfferListState>((ref) {
   return OfferListNotifier(

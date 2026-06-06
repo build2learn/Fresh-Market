@@ -12,6 +12,8 @@ import '../features/auth/pages/forgot_password_page.dart';
 import '../features/categories/admin/pages/admin_categories_page.dart';
 import '../features/categories/admin/pages/admin_category_form_page.dart';
 import '../features/categories/customer/pages/category_products_page.dart';
+import '../features/categories/customer/pages/categories_list_page.dart';
+import '../features/home/pages/home_page.dart';
 import '../features/products/admin/pages/admin_products_page.dart';
 import '../features/products/admin/pages/admin_product_form_page.dart';
 import '../features/products/customer/pages/product_detail_page.dart';
@@ -21,6 +23,7 @@ import '../features/offers/customer/pages/offer_detail_page.dart';
 import '../features/offers/customer/pages/offer_list_page.dart';
 import '../features/profile/pages/profile_page.dart';
 import '../features/splash/pages/splash_page.dart';
+import '../features/admin/pages/dashboard_page.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   debugPrint('[Router] Creating GoRouter with guards');
@@ -85,9 +88,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: RouteConstants.home,
             name: RouteNames.home,
-            builder: (context, state) => const Scaffold(
-              body: Center(child: Text('Home Page - TODO')),
-            ),
+            builder: (context, state) => const HomePage(),
+          ),
+          GoRoute(
+            path: RouteConstants.categoryList,
+            name: RouteNames.categoriesList,
+            builder: (context, state) => const CategoriesListPage(),
           ),
           GoRoute(
             path: '/categories/:id',
@@ -191,9 +197,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/admin',
             name: RouteNames.admin,
-            builder: (context, state) => const Scaffold(
-              body: Center(child: Text('Admin Dashboard - TODO')),
-            ),
+            builder: (context, state) => const DashboardPage(),
           ),
           GoRoute(
             path: '/admin/products',

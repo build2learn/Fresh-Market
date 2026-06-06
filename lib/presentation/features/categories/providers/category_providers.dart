@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fresh_market/data/providers/category_repository_provider.dart';
 import 'package:fresh_market/domain/usecases/category/get_categories.usecase.dart';
+import 'package:fresh_market/domain/usecases/category/get_visible_categories.usecase.dart';
 import 'package:fresh_market/domain/usecases/category/watch_categories.usecase.dart';
 import 'package:fresh_market/domain/usecases/category/toggle_visibility.usecase.dart';
 import 'package:fresh_market/domain/usecases/category/reorder_categories.usecase.dart';
@@ -36,6 +37,11 @@ final _toggleVisibilityUseCaseProvider = Provider<ToggleVisibilityUseCase>((ref)
 final _reorderCategoriesUseCaseProvider = Provider<ReorderCategoriesUseCase>((ref) {
   final repo = ref.watch(categoryRepositoryProvider);
   return ReorderCategoriesUseCase(repository: repo);
+});
+
+final getVisibleCategoriesUseCaseProvider = Provider<GetVisibleCategoriesUseCase>((ref) {
+  final repo = ref.watch(categoryRepositoryProvider);
+  return GetVisibleCategoriesUseCase(repository: repo);
 });
 
 final categoryListProvider =

@@ -21,10 +21,14 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
   void _navigateToScreen({required bool isAuthenticated}) {
     if (_navigated || !mounted) return;
-    _navigated = true;
     final destination = isAuthenticated ? RouteConstants.home : RouteConstants.signIn;
     debugPrint('[SplashPage] Navigating to: $destination');
-    context.go(destination);
+    try {
+      context.go(destination);
+      _navigated = true;
+    } catch (e, st) {
+      debugPrint('[SplashPage] Navigation failed: $e\n$st');
+    }
   }
 
   Future<void> _checkCurrentUser() async {
