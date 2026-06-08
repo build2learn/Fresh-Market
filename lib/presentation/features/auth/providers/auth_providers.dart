@@ -92,30 +92,31 @@ class AuthNotifier extends StateNotifier<AuthState> {
   StreamSubscription<UserEntity?>? _authSubscription;
 
   void _init() {
-    debugPrint('[AuthNotifier] Subscribing to auth state stream');
+    debugPrint('[AUTH] AuthNotifier._init() - subscribing to auth state stream');
+    debugPrint('[AUTH] AuthNotifier initial state: ${state.status}');
 
     _authSubscription = _watchAuthState.call().listen(
       (user) {
         if (user != null) {
-          debugPrint('[AuthNotifier] Auth state: authenticated as ${user.id}');
+          debugPrint('[AUTH] Auth state stream: authenticated as ${user.id}');
           state = AuthState(
             status: AuthStatus.authenticated,
             user: user,
           );
         } else {
-          debugPrint('[AuthNotifier] Auth state: unauthenticated');
+          debugPrint('[AUTH] Auth state stream: unauthenticated (user=null)');
           state = const AuthState(status: AuthStatus.unauthenticated);
         }
       },
       onError: (Object error, StackTrace stackTrace) {
-        debugPrint('[AuthNotifier] Auth stream error: $error');
+        debugPrint('[AUTH] Auth stream error: $error');
         state = AuthState(
           status: AuthStatus.unauthenticated,
           errorMessage: error.toString(),
         );
       },
       onDone: () {
-        debugPrint('[AuthNotifier] Auth stream closed');
+        debugPrint('[AUTH] Auth stream done');
         if (state.status == AuthStatus.uninitialized) {
           state = const AuthState(status: AuthStatus.unauthenticated);
         }
@@ -124,7 +125,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     Future.delayed(const Duration(seconds: 5), () {
       if (state.status == AuthStatus.uninitialized) {
-        debugPrint('[AuthNotifier] Stream timeout - forcing unauthenticated');
+        debugPrint('[AUTH] AuthNotifier 5s timeout - forcing unauthenticated');
         state = const AuthState(status: AuthStatus.unauthenticated);
       }
     });
@@ -191,7 +192,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 }
 
 final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  debugPrint('[AuthNotifierProvider] Creating AuthNotifier');
+  debugPrint('[AUTH] authNotifierProvider: creating AuthNotifier');
   return AuthNotifier(
     watchAuthState: ref.watch(watchAuthStateUseCaseProvider),
     signIn: ref.watch(signInUseCaseProvider),

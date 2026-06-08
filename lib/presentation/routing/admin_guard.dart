@@ -1,8 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fresh_market/presentation/features/auth/providers/auth_providers.dart';
+import 'package:fresh_market/presentation/providers/app_providers.dart';
 
 class AdminGuard {
   final Ref _ref;
@@ -10,16 +9,19 @@ class AdminGuard {
   AdminGuard(this._ref);
 
   String? call(BuildContext context, GoRouterState state) {
+    final location = state.matchedLocation;
+    if (!location.startsWith('/admin')) return null;
+
     final authState = _ref.read(authNotifierProvider);
     final isAdmin = authState.isAdmin;
-    debugPrint('[AdminGuard] Checking: location=${state.matchedLocation}, isAdmin=$isAdmin, authStatus=${authState.status}');
+    debugPrint('[AUTH] AdminGuard: location=$location, isAdmin=$isAdmin');
 
     if (!isAdmin) {
-      debugPrint('[AdminGuard] Redirecting non-admin to home');
+      debugPrint('[AUTH] AdminGuard: redirect non-admin to home');
       return '/home';
     }
 
-    debugPrint('[AdminGuard] Allowing admin access');
+    debugPrint('[AUTH] AdminGuard: ALLOW admin access');
     return null;
   }
 }

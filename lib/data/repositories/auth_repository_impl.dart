@@ -78,23 +78,23 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Result<UserEntity?>> getCurrentUser() async {
     try {
       final authUser = _firebaseDataSource.currentUser;
-      debugPrint('[AuthRepo] getCurrentUser: authUser=${authUser?.uid ?? "null"}');
+      debugPrint('[AUTH] AuthRepo.getCurrentUser: authUser=${authUser?.uid ?? "null"}');
       if (authUser == null) {
         await _localDataSource.clearCache();
-        debugPrint('[AuthRepo] getCurrentUser: no user cached');
+        debugPrint('[AUTH] AuthRepo.getCurrentUser: no user -> Success(null)');
         return const Success(null);
       }
-      debugPrint('[AuthRepo] getCurrentUser: fetching Firestore doc for ${authUser.uid}');
+      debugPrint('[AUTH] AuthRepo.getCurrentUser: fetching Firestore doc for ${authUser.uid}');
       final userData = await _firebaseDataSource.getUserData(authUser.uid);
       if (userData != null) {
         final dto = UserDto.fromMap(userData, authUser.uid);
-        debugPrint('[AuthRepo] getCurrentUser: user doc found');
+        debugPrint('[AUTH] AuthRepo.getCurrentUser: user doc found');
         return Success(UserModel.fromDto(dto).toEntity());
       }
-      debugPrint('[AuthRepo] getCurrentUser: no Firestore doc for ${authUser.uid}');
+      debugPrint('[AUTH] AuthRepo.getCurrentUser: no Firestore doc -> Success(null)');
       return const Success(null);
     } catch (e, st) {
-      debugPrint('[AuthRepo] getCurrentUser error: $e\n$st');
+      debugPrint('[AUTH] AuthRepo.getCurrentUser error: $e\n$st');
       return Failure(AuthException(message: 'Failed to get current user'));
     }
   }
@@ -104,22 +104,22 @@ class AuthRepositoryImpl implements AuthRepository {
     return _firebaseDataSource.watchAuthState().asyncMap((authUser) async {
       try {
         if (authUser == null) {
-          debugPrint('[AuthRepo] watchAuthState: no user, clearing cache');
+          debugPrint('[AUTH] AuthRepo.watchAuthState: no user');
           await _localDataSource.clearCache();
           return null;
         }
-        debugPrint('[AuthRepo] watchAuthState: user=${authUser.uid}, fetching user data');
+        debugPrint('[AUTH] AuthRepo.watchAuthState: user=${authUser.uid}');
         final userData = await _firebaseDataSource.getUserData(authUser.uid);
         if (userData != null) {
           final dto = UserDto.fromMap(userData, authUser.uid);
           final entity = UserModel.fromDto(dto).toEntity();
-          debugPrint('[AuthRepo] watchAuthState: user data found for ${authUser.uid}');
+          debugPrint('[AUTH] AuthRepo.watchAuthState: user data found');
           return entity;
         }
-        debugPrint('[AuthRepo] watchAuthState: no user document for ${authUser.uid}');
+        debugPrint('[AUTH] AuthRepo.watchAuthState: no Firestore doc');
         return null;
       } catch (e, st) {
-        debugPrint('[AuthRepo] watchAuthState error: $e\n$st');
+        debugPrint('[AUTH] AuthRepo.watchAuthState error: $e\n$st');
         return null;
       }
     });

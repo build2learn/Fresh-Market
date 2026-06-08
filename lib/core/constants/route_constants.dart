@@ -1,6 +1,6 @@
 abstract final class RouteConstants {
-  static const String splash = '/';
-  static const String signIn = '/sign-in';
+  static const String splash = '/splash';
+  static const String signIn = '/login';
   static const String signUp = '/sign-up';
   static const String forgotPassword = '/forgot-password';
 

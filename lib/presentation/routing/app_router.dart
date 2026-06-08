@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fresh_market/presentation/providers/app_providers.dart';
 import 'route_names.dart';
 import 'auth_guard.dart';
 import 'admin_guard.dart';
@@ -26,27 +26,16 @@ import '../features/splash/pages/splash_page.dart';
 import '../features/admin/pages/dashboard_page.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
-  debugPrint('[Router] Creating GoRouter with guards');
+  ref.watch(authNotifierProvider);
   final authGuard = AuthGuard(ref);
   final adminGuard = AdminGuard(ref);
-  debugPrint('[Router] Guards created');
 
   return GoRouter(
     initialLocation: RouteConstants.splash,
     redirect: (context, state) {
-      debugPrint('[Router] Redirect callback: location=${state.matchedLocation}');
       final authRedirect = authGuard(context, state);
-      if (authRedirect != null) {
-        debugPrint('[Router] AuthGuard redirected to: $authRedirect');
-        return authRedirect;
-      }
-
-      final isAdminRoute = state.matchedLocation.startsWith('/admin');
-      if (isAdminRoute) {
-        return adminGuard(context, state);
-      }
-
-      return null;
+      if (authRedirect != null) return authRedirect;
+      return adminGuard(context, state);
     },
     routes: [
       GoRoute(

@@ -1,13 +1,9 @@
-import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fresh_market/core/constants/route_constants.dart';
 import 'package:fresh_market/core/extensions/context_extensions.dart';
-import 'package:fresh_market/core/utils/result.dart';
-import 'package:fresh_market/domain/entities/user.entity.dart';
-import 'package:fresh_market/presentation/features/auth/providers/auth_providers.dart';
+import 'package:fresh_market/presentation/providers/app_providers.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -19,103 +15,96 @@ class SplashPage extends ConsumerStatefulWidget {
 class _SplashPageState extends ConsumerState<SplashPage> {
   bool _navigated = false;
 
-  void _navigateToScreen({required bool isAuthenticated}) {
-    if (_navigated || !mounted) return;
-    final destination = isAuthenticated ? RouteConstants.home : RouteConstants.signIn;
-    debugPrint('[SplashPage] Navigating to: $destination');
-    try {
-      context.go(destination);
-      _navigated = true;
-    } catch (e, st) {
-      debugPrint('[SplashPage] Navigation failed: $e\n$st');
-    }
-  }
-
-  Future<void> _checkCurrentUser() async {
-    debugPrint('[SplashPage] Checking current user via getCurrentUser()');
-    try {
-      final getCurrentUser = ref.read(getCurrentUserUseCaseProvider);
-      final result = await getCurrentUser.call().timeout(const Duration(seconds: 5));
-      if (result is Success<UserEntity?>) {
-        final isAuthed = result.data != null;
-        debugPrint('[SplashPage] getCurrentUser result: ${isAuthed ? "authenticated" : "unauthenticated"}');
-        _navigateToScreen(isAuthenticated: isAuthed);
-      } else if (result is Failure<UserEntity?>) {
-        debugPrint('[SplashPage] getCurrentUser failed: ${result.error.message}');
-        _navigateToScreen(isAuthenticated: false);
-      }
-    } on TimeoutException {
-      debugPrint('[SplashPage] getCurrentUser timed out after 5s');
-      _navigateToScreen(isAuthenticated: false);
-    } catch (e, st) {
-      debugPrint('[SplashPage] getCurrentUser error: $e\n$st');
-      _navigateToScreen(isAuthenticated: false);
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    debugPrint('[SplashPage] initState started');
 
-    _checkCurrentUser();
-
-    ref.listenManual(authNotifierProvider, (prev, next) {
-      if (_navigated) {
-        debugPrint('[SplashPage] Auth changed after navigation: ${next.status} - ignoring');
-        return;
-      }
-      final prevStatus = prev?.status;
-      debugPrint('[SplashPage] Auth status changed: $prevStatus -> ${next.status}');
-      if (next.status != AuthStatus.uninitialized) {
-        _navigateToScreen(isAuthenticated: next.isAuthenticated);
+    ref.listen(firebaseReadyProvider, (prev, next) {
+      if (next is AsyncData) {
+        debugPrint('[SPLASH] Firebase ready');
+        _maybeNavigate();
       }
     });
 
-    Future.delayed(const Duration(seconds: 10), () {
-      if (!_navigated && mounted) {
-        debugPrint('[SplashPage] FORCE TIMEOUT - navigating to sign-in');
-        _navigateToScreen(isAuthenticated: false);
+    ref.listen(authNotifierProvider, (prev, next) {
+      if (!next.isUninitialized) {
+        debugPrint('[SPLASH] Auth resolved');
+        _maybeNavigate();
       }
     });
+  }
+
+  void _maybeNavigate() {
+    if (_navigated || !mounted) return;
+
+    final firebaseReady = ref.read(firebaseReadyProvider);
+    final authState = ref.read(authNotifierProvider);
+
+    if (firebaseReady is! AsyncData) return;
+    if (authState.isUninitialized) return;
+
+    _navigated = true;
+
+    if (authState.isAuthenticated) {
+      if (authState.isAdmin) {
+        debugPrint('[SPLASH] Navigating to admin');
+        context.go('/admin');
+      } else {
+        debugPrint('[SPLASH] Navigating to home');
+        context.go(RouteConstants.home);
+      }
+    } else {
+      debugPrint('[SPLASH] Navigating to login');
+      context.go(RouteConstants.signIn);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final firebaseAsync = ref.watch(firebaseReadyProvider);
     final authState = ref.watch(authNotifierProvider);
-    debugPrint('[SplashPage] build - auth status: ${authState.status}');
 
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.store,
-              size: 80,
-              color: context.colorScheme.primary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Fresh Market',
-              style: context.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: context.colorScheme.primary,
-              ),
-            ),
-            if (authState.errorMessage != null) ...[
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.store, size: 80, color: context.colorScheme.primary),
               const SizedBox(height: 16),
-              Text(
-                authState.errorMessage!,
-                style: context.textTheme.bodySmall?.copyWith(color: context.colorScheme.error),
-                textAlign: TextAlign.center,
+              Text('Fresh Market', style: context.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold, color: context.colorScheme.primary,
+              )),
+              const SizedBox(height: 32),
+              firebaseAsync.when(
+                data: (_) => authState.isUninitialized
+                    ? const CircularProgressIndicator()
+                    : Column(
+                        children: [
+                          Icon(
+                            authState.isAuthenticated ? Icons.check_circle : Icons.info,
+                            color: authState.isAuthenticated ? Colors.green : Colors.orange,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            authState.isAuthenticated ? 'Authenticated' : 'Not signed in',
+                            style: context.textTheme.titleMedium,
+                          ),
+                        ],
+                      ),
+                loading: () => const CircularProgressIndicator(),
+                error: (e, _) => Text('Firebase Error: $e', style: TextStyle(color: context.colorScheme.error)),
               ),
+              if (authState.errorMessage != null) ...[
+                const SizedBox(height: 12),
+                Text(authState.errorMessage!, style: context.textTheme.bodySmall?.copyWith(
+                  color: context.colorScheme.error,
+                ), textAlign: TextAlign.center),
+              ],
             ],
-            const SizedBox(height: 32),
-            CircularProgressIndicator(
-              color: context.colorScheme.primary,
-            ),
-          ],
+          ),
         ),
       ),
     );

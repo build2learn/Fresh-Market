@@ -24,30 +24,32 @@ class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
   @override
   void initState() {
     super.initState();
-    debugPrint('[App] initState - starting locale initialization');
+    debugPrint('[APP] FreshMarketApp.initState - starting locale initialization');
     _initLocaleWithTimeout();
   }
 
   Future<void> _initLocaleWithTimeout() async {
     try {
+      debugPrint('[APP] Loading locale from SharedPreferences...');
       await ref.read(localeProvider.notifier).load().timeout(const Duration(seconds: 5));
-      debugPrint('[App] _initLocale - locale loaded');
+      debugPrint('[APP] _initLocale - locale loaded');
     } on TimeoutException {
-      debugPrint('[App] _initLocale TIMEOUT after 5s - continuing anyway');
+      debugPrint('[APP] _initLocale TIMEOUT after 5s - continuing anyway');
     } catch (e, st) {
-      debugPrint('[App] _initLocale error: $e\n$st');
+      debugPrint('[APP] _initLocale error: $e\n$st');
     }
     if (mounted) {
       setState(() => _initialized = true);
-      debugPrint('[App] _initialized forced to true');
+      debugPrint('[APP] _initialized = true');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final firebaseResult = ref.watch(firebaseInitResultProvider);
+    debugPrint('[APP] build() - _initialized=$_initialized, firebaseSuccess=${firebaseResult.isSuccess}');
     if (!firebaseResult.isSuccess) {
-      debugPrint('[App] Showing Firebase error screen');
+      debugPrint('[APP] Showing Firebase error screen');
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
@@ -84,7 +86,7 @@ class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
     }
 
     if (!_initialized) {
-      debugPrint('[App] Build: waiting for locale initialization');
+      debugPrint('[APP] Build: waiting for locale initialization');
       return const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
@@ -93,12 +95,12 @@ class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
       );
     }
 
-    debugPrint('[App] Build: creating router');
+    debugPrint('[APP] Build: creating router');
     final locale = ref.watch(localeProvider);
     final isArabic = locale.languageCode == 'ar';
     final router = ref.watch(goRouterProvider);
 
-    debugPrint('[App] Build: app ready');
+    debugPrint('[APP] Build: app ready - routing to splash page');
     return MaterialApp.router(
       title: 'Fresh Market',
       debugShowCheckedModeBanner: false,

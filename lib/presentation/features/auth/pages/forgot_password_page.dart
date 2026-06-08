@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fresh_market/core/extensions/context_extensions.dart';
-import 'package:fresh_market/presentation/features/auth/providers/auth_providers.dart';
+import 'package:fresh_market/presentation/providers/app_providers.dart';
 import 'package:fresh_market/presentation/features/auth/widgets/auth_form_field.dart';
 
 class ForgotPasswordPage extends ConsumerStatefulWidget {

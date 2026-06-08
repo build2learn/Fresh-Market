@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final class FirebaseInitResult {
@@ -13,14 +14,17 @@ final class FirebaseInitResult {
 }
 
 final firebaseInitResultProvider = Provider<FirebaseInitResult>((ref) {
+  debugPrint('[BOOT] firebaseInitResultProvider: default (not initialized)');
   return FirebaseInitResult.notInitialized;
 });
 
 final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
+  debugPrint('[AUTH] firebaseAuthProvider: FirebaseAuth.instance');
   return FirebaseAuth.instance;
 });
 
 final firebaseFirestoreProvider = Provider<FirebaseFirestore>((ref) {
+  debugPrint('[FIREBASE] firebaseFirestoreProvider: FirebaseFirestore.instance');
   return FirebaseFirestore.instance;
 });
 
