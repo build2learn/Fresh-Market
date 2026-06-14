@@ -18,6 +18,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   @override
   void initState() {
     super.initState();
+    debugPrint('[SPLASH] initState');
 
     ref.listen(firebaseReadyProvider, (prev, next) {
       if (next is AsyncData) {
@@ -32,6 +33,13 @@ class _SplashPageState extends ConsumerState<SplashPage> {
         _maybeNavigate();
       }
     });
+
+    Future.microtask(() {
+      if (mounted) {
+        debugPrint('[SPLASH] initState microtask: checking ready');
+        _maybeNavigate();
+      }
+    });
   }
 
   void _maybeNavigate() {
@@ -43,18 +51,21 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     if (firebaseReady is! AsyncData) return;
     if (authState.isUninitialized) return;
 
+    debugPrint('[SPLASH] authenticated = ${authState.isAuthenticated}');
+    debugPrint('[SPLASH] isAdmin = ${authState.isAdmin}');
+
     _navigated = true;
 
     if (authState.isAuthenticated) {
       if (authState.isAdmin) {
-        debugPrint('[SPLASH] Navigating to admin');
+        debugPrint('[SPLASH] navigating to admin');
         context.go('/admin');
       } else {
-        debugPrint('[SPLASH] Navigating to home');
+        debugPrint('[SPLASH] navigating to home');
         context.go(RouteConstants.home);
       }
     } else {
-      debugPrint('[SPLASH] Navigating to login');
+      debugPrint('[SPLASH] navigating to login');
       context.go(RouteConstants.signIn);
     }
   }
@@ -63,6 +74,10 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   Widget build(BuildContext context) {
     final firebaseAsync = ref.watch(firebaseReadyProvider);
     final authState = ref.watch(authNotifierProvider);
+
+    debugPrint('[SPLASH] splash created');
+    debugPrint('[SPLASH] firebaseReadyProvider state: ${firebaseAsync.runtimeType}');
+    debugPrint('[SPLASH] authNotifierProvider state: status=${authState.status}, isAuthenticated=${authState.isAuthenticated}, isAdmin=${authState.isAdmin}');
 
     return Scaffold(
       body: Center(

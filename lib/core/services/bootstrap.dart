@@ -49,6 +49,7 @@ final class Bootstrap {
   Bootstrap._();
 
   static Future<void> run({Flavor flavor = Flavor.development}) async {
+    print("[BOOT] bootstrap started");
     WidgetsFlutterBinding.ensureInitialized();
     debugPrint('[BOOT] Bootstrap.run() started with flavor: $flavor');
 
@@ -59,6 +60,7 @@ final class Bootstrap {
     debugPrint('[BOOT] Firebase status: ${initResult.isSuccess}');
 
     debugPrint('[BOOT] Launching app...');
+    print("[RUNAPP] runApp called");
     runApp(
       ProviderScope(
         overrides: [

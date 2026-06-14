@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fresh_market/presentation/providers/app_providers.dart';
 import 'route_names.dart';
 import 'auth_guard.dart';
 import 'admin_guard.dart';
@@ -26,16 +25,23 @@ import '../features/splash/pages/splash_page.dart';
 import '../features/admin/pages/dashboard_page.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
-  ref.watch(authNotifierProvider);
   final authGuard = AuthGuard(ref);
   final adminGuard = AdminGuard(ref);
 
   return GoRouter(
     initialLocation: RouteConstants.splash,
     redirect: (context, state) {
+      debugPrint('[ROUTER] navigation: location=${state.matchedLocation}');
       final authRedirect = authGuard(context, state);
-      if (authRedirect != null) return authRedirect;
-      return adminGuard(context, state);
+      if (authRedirect != null) {
+        debugPrint('[ROUTER] navigation: authGuard redirect -> $authRedirect');
+        return authRedirect;
+      }
+      final adminRedirect = adminGuard(context, state);
+      if (adminRedirect != null) {
+        debugPrint('[ROUTER] navigation: adminGuard redirect -> $adminRedirect');
+      }
+      return adminRedirect;
     },
     routes: [
       GoRoute(

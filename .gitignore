@@ -39,11 +39,6 @@ serviceAccount.json
 *.mocks.dart
 
 # ======================
-# FlutterFire CLI generated config (real credentials per-device)
-# ======================
-firebase_options.dart
-
-# ======================
 # Flutter Generated Platform Files (local paths, machine-specific)
 # ======================
 ios/Flutter/Generated.xcconfig
