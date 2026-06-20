@@ -12,6 +12,7 @@ class OfferEntity extends Equatable {
   final DateTime endDate;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String offerType;
 
   const OfferEntity({
     required this.id,
@@ -25,6 +26,7 @@ class OfferEntity extends Equatable {
     required this.endDate,
     required this.createdAt,
     required this.updatedAt,
+    this.offerType = 'PercentageDiscount',
   });
 
   bool get isCurrentlyActive =>
@@ -49,6 +51,7 @@ class OfferEntity extends Equatable {
     endDate,
     createdAt,
     updatedAt,
+    offerType,
   ];
 
   OfferEntity copyWith({
@@ -63,6 +66,7 @@ class OfferEntity extends Equatable {
     DateTime? endDate,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? offerType,
   }) {
     return OfferEntity(
       id: id ?? this.id,
@@ -76,6 +80,7 @@ class OfferEntity extends Equatable {
       endDate: endDate ?? this.endDate,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      offerType: offerType ?? this.offerType,
     );
   }
 }

@@ -12,6 +12,7 @@ class OfferDto {
   final DateTime endDate;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String offerType;
 
   const OfferDto({
     required this.id,
@@ -25,6 +26,7 @@ class OfferDto {
     required this.endDate,
     required this.createdAt,
     required this.updatedAt,
+    this.offerType = 'PercentageDiscount',
   });
 
   static DateTime _toDateTime(dynamic value) {
@@ -49,6 +51,7 @@ class OfferDto {
       endDate: _toDateTime(map['endDate']),
       createdAt: _toDateTime(map[FirestoreConstants.createdAt]),
       updatedAt: _toDateTime(map[FirestoreConstants.updatedAt]),
+      offerType: map['offerType'] as String? ?? 'PercentageDiscount',
     );
   }
 
@@ -61,10 +64,11 @@ class OfferDto {
       'descriptionEn': descriptionEn,
       'imageUrl': imageUrl,
       FirestoreConstants.isActive: isActive,
-      'startDate': startDate,
-      'endDate': endDate,
-      FirestoreConstants.createdAt: createdAt,
-      FirestoreConstants.updatedAt: updatedAt,
+      'startDate': startDate.toIso8601String(),
+      'endDate': endDate.toIso8601String(),
+      FirestoreConstants.createdAt: createdAt.toIso8601String(),
+      FirestoreConstants.updatedAt: updatedAt.toIso8601String(),
+      'offerType': offerType,
     };
   }
 
@@ -80,6 +84,7 @@ class OfferDto {
     DateTime? endDate,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? offerType,
   }) {
     return OfferDto(
       id: id ?? this.id,
@@ -93,6 +98,7 @@ class OfferDto {
       endDate: endDate ?? this.endDate,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      offerType: offerType ?? this.offerType,
     );
   }
 }

@@ -9,7 +9,7 @@ class UpdateCategoryUseCase {
   UpdateCategoryUseCase({required CategoryRepository repository})
       : _repository = repository;
 
-  Future<Result<CategoryEntity>> call(CategoryEntity category) {
+  Future<Result<CategoryEntity>> call(CategoryEntity category, {String? imagePath}) {
     if (category.nameAr.trim().isEmpty) {
       return Future.value(Failure(
         ValidationException(message: 'Arabic name is required', code: 'validation'),
@@ -20,6 +20,6 @@ class UpdateCategoryUseCase {
         ValidationException(message: 'English name is required', code: 'validation'),
       ));
     }
-    return _repository.updateCategory(category);
+    return _repository.updateCategory(category, imagePath: imagePath);
   }
 }

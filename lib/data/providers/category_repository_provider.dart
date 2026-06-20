@@ -13,7 +13,8 @@ final sharedPreferencesProvider = FutureProvider<SharedPreferences>((ref) {
 
 final _categoryFirebaseDataSourceProvider = Provider<CategoryFirebaseDataSource>((ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
-  return CategoryFirebaseDataSourceImpl(firestore: firestore);
+  final storage = ref.watch(firebaseStorageProvider);
+  return CategoryFirebaseDataSourceImpl(firestore: firestore, storage: storage);
 });
 
 final _categoryLocalDataSourceProvider = Provider<CategoryLocalDataSource>((ref) {

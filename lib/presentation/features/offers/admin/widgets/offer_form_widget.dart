@@ -6,7 +6,7 @@ import 'package:fresh_market/domain/entities/product.entity.dart';
 import '../../providers/offer_form_provider.dart';
 import 'offer_product_selector.dart';
 
-class OfferFormWidget extends StatelessWidget {
+class OfferFormWidget extends StatefulWidget {
   final OfferFormState state;
   final ValueChanged<String> onTitleArChanged;
   final ValueChanged<String> onTitleEnChanged;
@@ -16,10 +16,12 @@ class OfferFormWidget extends StatelessWidget {
   final ValueChanged<DateTime> onStartDateChanged;
   final ValueChanged<DateTime> onEndDateChanged;
   final ValueChanged<String>? onImageSelected;
+  final ValueChanged<String>? onOfferTypeChanged;
   final VoidCallback onSubmit;
   final String? pickedImagePath;
   final List<ProductEntity> products;
   final ValueChanged<String> onProductToggled;
+  final List<DropdownMenuItem<String>>? offerTypeItems;
 
   const OfferFormWidget({
     super.key,
@@ -32,11 +34,58 @@ class OfferFormWidget extends StatelessWidget {
     required this.onStartDateChanged,
     required this.onEndDateChanged,
     this.onImageSelected,
+    this.onOfferTypeChanged,
     required this.onSubmit,
     this.pickedImagePath,
     required this.products,
     required this.onProductToggled,
+    this.offerTypeItems,
   });
+
+  @override
+  State<OfferFormWidget> createState() => _OfferFormWidgetState();
+}
+
+class _OfferFormWidgetState extends State<OfferFormWidget> {
+  late final TextEditingController _titleArController;
+  late final TextEditingController _titleEnController;
+  late final TextEditingController _descriptionArController;
+  late final TextEditingController _descriptionEnController;
+  bool _controllersInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleArController = TextEditingController(text: widget.state.titleAr);
+    _titleEnController = TextEditingController(text: widget.state.titleEn);
+    _descriptionArController = TextEditingController(text: widget.state.descriptionAr ?? '');
+    _descriptionEnController = TextEditingController(text: widget.state.descriptionEn ?? '');
+    _controllersInitialized = widget.state.titleAr.isNotEmpty ||
+        widget.state.titleEn.isNotEmpty ||
+        widget.state.isEditMode;
+  }
+
+  @override
+  void didUpdateWidget(covariant OfferFormWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Sync controllers when edit-mode data first loads from async fetch
+    if (!_controllersInitialized && widget.state.isEditMode) {
+      _titleArController.text = widget.state.titleAr;
+      _titleEnController.text = widget.state.titleEn;
+      _descriptionArController.text = widget.state.descriptionAr ?? '';
+      _descriptionEnController.text = widget.state.descriptionEn ?? '';
+      _controllersInitialized = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleArController.dispose();
+    _titleEnController.dispose();
+    _descriptionArController.dispose();
+    _descriptionEnController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,69 +93,77 @@ class OfferFormWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (onImageSelected != null) _buildImageSection(context),
-          if (onImageSelected != null) const SizedBox(height: 24),
+          if (widget.onImageSelected != null) _buildImageSection(context),
+          if (widget.onImageSelected != null) const SizedBox(height: 24),
           TextField(
             decoration: InputDecoration(labelText: context.l10n.offerTitle),
             textDirection: TextDirection.rtl,
-            controller: TextEditingController(text: state.titleAr),
-            onChanged: onTitleArChanged,
+            controller: _titleArController,
+            onChanged: widget.onTitleArChanged,
           ),
           const SizedBox(height: 16),
           TextField(
             decoration: InputDecoration(labelText: '${context.l10n.offerTitle} (English)'),
             textDirection: TextDirection.ltr,
-            controller: TextEditingController(text: state.titleEn),
-            onChanged: onTitleEnChanged,
+            controller: _titleEnController,
+            onChanged: widget.onTitleEnChanged,
           ),
           const SizedBox(height: 16),
           TextField(
             decoration: InputDecoration(labelText: '${context.l10n.offerDescription} (Arabic)'),
             textDirection: TextDirection.rtl,
             maxLines: 3,
-            controller: TextEditingController(text: state.descriptionAr ?? ''),
-            onChanged: onDescriptionArChanged,
+            controller: _descriptionArController,
+            onChanged: widget.onDescriptionArChanged,
           ),
           const SizedBox(height: 16),
           TextField(
             decoration: InputDecoration(labelText: '${context.l10n.offerDescription} (English)'),
             textDirection: TextDirection.ltr,
             maxLines: 3,
-            controller: TextEditingController(text: state.descriptionEn ?? ''),
-            onChanged: onDescriptionEnChanged,
+            controller: _descriptionEnController,
+            onChanged: widget.onDescriptionEnChanged,
           ),
           const SizedBox(height: 16),
           _buildDateField(
             context,
             label: context.l10n.startDate,
-            date: state.startDate,
-            onPicked: onStartDateChanged,
+            date: widget.state.startDate,
+            onPicked: widget.onStartDateChanged,
           ),
           const SizedBox(height: 16),
           _buildDateField(
             context,
             label: context.l10n.endDate,
-            date: state.endDate,
-            onPicked: onEndDateChanged,
+            date: widget.state.endDate,
+            onPicked: widget.onEndDateChanged,
+          ),
+          DropdownButtonFormField<String>(
+            value: widget.state.offerType.isNotEmpty ? widget.state.offerType : null,
+            decoration: const InputDecoration(labelText: 'Offer Type / نوع العرض'),
+            items: widget.offerTypeItems,
+            onChanged: (v) {
+              if (v != null && widget.onOfferTypeChanged != null) widget.onOfferTypeChanged!(v);
+            },
           ),
           const SizedBox(height: 16),
           SwitchListTile(
-            title: Text(state.isActive ? context.l10n.active : context.l10n.inactive),
-            value: state.isActive,
-            onChanged: onActiveChanged,
+            title: Text(widget.state.isActive ? context.l10n.active : context.l10n.inactive),
+            value: widget.state.isActive,
+            onChanged: widget.onActiveChanged,
           ),
           const SizedBox(height: 16),
           Text(context.l10n.includeProducts, style: context.textTheme.titleMedium),
           const SizedBox(height: 8),
           OfferProductSelector(
-            products: products,
-            selectedProductIds: state.selectedProductIds,
-            onProductToggled: onProductToggled,
+            products: widget.products,
+            selectedProductIds: widget.state.selectedProductIds,
+            onProductToggled: widget.onProductToggled,
           ),
           const SizedBox(height: 16),
-          if (state.errorMessage != null) ...[
+          if (widget.state.errorMessage != null) ...[
             Text(
-              state.errorMessage!,
+              widget.state.errorMessage!,
               style: context.textTheme.bodySmall?.copyWith(
                 color: context.colorScheme.error,
               ),
@@ -114,8 +171,8 @@ class OfferFormWidget extends StatelessWidget {
             const SizedBox(height: 16),
           ],
           FilledButton(
-            onPressed: state.isSubmitting ? null : onSubmit,
-            child: state.isSubmitting
+            onPressed: widget.state.isSubmitting ? null : widget.onSubmit,
+            child: widget.state.isSubmitting
                 ? const SizedBox(
                     width: 20,
                     height: 20,
@@ -166,21 +223,21 @@ class OfferFormWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: context.colorScheme.outlineVariant),
         ),
-        child: pickedImagePath != null
+        child: widget.pickedImagePath != null
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.file(
-                  File(pickedImagePath!),
+                  File(widget.pickedImagePath!),
                   fit: BoxFit.cover,
                   width: double.infinity,
                   errorBuilder: (_, __, ___) => _placeholder(context),
                 ),
               )
-            : state.imageUrl != null
+            : widget.state.imageUrl != null
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.network(
-                      state.imageUrl!,
+                      widget.state.imageUrl!,
                       fit: BoxFit.cover,
                       width: double.infinity,
                       errorBuilder: (_, __, ___) => _placeholder(context),
@@ -218,8 +275,8 @@ class OfferFormWidget extends StatelessWidget {
               onTap: () async {
                 Navigator.of(ctx).pop();
                 final file = await ImageUtils.pickFromCamera();
-                if (file != null && onImageSelected != null) {
-                  onImageSelected!(file.path);
+                if (file != null && widget.onImageSelected != null) {
+                  widget.onImageSelected!(file.path);
                 }
               },
             ),
@@ -229,8 +286,8 @@ class OfferFormWidget extends StatelessWidget {
               onTap: () async {
                 Navigator.of(ctx).pop();
                 final file = await ImageUtils.pickFromGallery();
-                if (file != null && onImageSelected != null) {
-                  onImageSelected!(file.path);
+                if (file != null && widget.onImageSelected != null) {
+                  widget.onImageSelected!(file.path);
                 }
               },
             ),

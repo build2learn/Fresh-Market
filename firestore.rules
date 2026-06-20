@@ -1,0 +1,113 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isStaff() {
+      return isAuthenticated() && 
+        resource.data.role != 'customer' &&
+        getUserData().role != 'customer';
+    }
+
+    function isStaffUser(userData) {
+      return userData != null && userData.role != 'customer';
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && getUserData().role == 'admin';
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // categories
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isStaffUser(getUserData()) && (getUserData().role == 'admin' || getUserData().role == 'manager');
+    }
+
+    // products
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isStaffUser(getUserData()) && (getUserData().role == 'admin' || getUserData().role == 'manager');
+    }
+
+    // users
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isStaffUser(getUserData()));
+      allow write: if isAuthenticated() && (isOwner(userId) || getUserData().role == 'admin');
+    }
+
+    // addresses
+    match /addresses/{addressId} {
+      allow read, write: if isAuthenticated() && (resource == null || isOwner(resource.data.userId) || isOwner(request.resource.data.userId) || isStaffUser(getUserData()));
+    }
+
+    // orders
+    match /orders/{orderId} {
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isStaffUser(getUserData()));
+      allow update, delete: if isAuthenticated() && isStaffUser(getUserData());
+    }
+
+    // audit_logs
+    match /audit_logs/{logId} {
+      allow create: if isAuthenticated();
+      allow read: if isAuthenticated() && getUserData().role == 'admin';
+      allow update, delete: if false;
+    }
+
+    // settings
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && getUserData().role == 'admin';
+    }
+
+    // coupons
+    match /coupons/{couponId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isStaffUser(getUserData()) && (getUserData().role == 'admin' || getUserData().role == 'manager');
+    }
+
+    // offers
+    match /offers/{offerId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isStaffUser(getUserData()) && (getUserData().role == 'admin' || getUserData().role == 'manager');
+    }
+
+    // weight_units
+    match /weight_units/{unitId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && getUserData().role == 'admin';
+    }
+
+    // stock_history
+    match /stock_history/{historyId} {
+      allow read, write: if isAuthenticated() && isStaffUser(getUserData());
+    }
+
+    // suppliers
+    match /suppliers/{supplierId} {
+      allow read, write: if isAuthenticated() && isStaffUser(getUserData());
+    }
+
+    // purchase_orders
+    match /purchase_orders/{poId} {
+      allow read, write: if isAuthenticated() && isStaffUser(getUserData());
+    }
+
+    // supplier_payments
+    match /supplier_payments/{paymentId} {
+      allow read, write: if isAuthenticated() && isStaffUser(getUserData());
+    }
+  }
+}

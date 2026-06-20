@@ -6,6 +6,7 @@ class CategoryEntity extends Equatable {
   final String nameEn;
   final String? imageUrl;
   final bool isVisible;
+  final bool isActive;
   final bool isDeleted;
   final int sortOrder;
   final DateTime createdAt;
@@ -17,15 +18,16 @@ class CategoryEntity extends Equatable {
     required this.nameEn,
     this.imageUrl,
     this.isVisible = true,
+    this.isActive = true,
     this.isDeleted = false,
     this.sortOrder = 0,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  CategoryEntity get asDeleted => copyWith(isDeleted: true, isVisible: false);
+  CategoryEntity get asDeleted => copyWith(isDeleted: true, isVisible: false, isActive: false);
 
-  CategoryEntity get asRestored => copyWith(isDeleted: false);
+  CategoryEntity get asRestored => copyWith(isDeleted: false, isActive: true);
 
   @override
   List<Object?> get props => [
@@ -34,6 +36,7 @@ class CategoryEntity extends Equatable {
     nameEn,
     imageUrl,
     isVisible,
+    isActive,
     isDeleted,
     sortOrder,
     createdAt,
@@ -46,6 +49,7 @@ class CategoryEntity extends Equatable {
     String? nameEn,
     String? imageUrl,
     bool? isVisible,
+    bool? isActive,
     bool? isDeleted,
     int? sortOrder,
     DateTime? createdAt,
@@ -57,6 +61,7 @@ class CategoryEntity extends Equatable {
       nameEn: nameEn ?? this.nameEn,
       imageUrl: imageUrl ?? this.imageUrl,
       isVisible: isVisible ?? this.isVisible,
+      isActive: isActive ?? this.isActive,
       isDeleted: isDeleted ?? this.isDeleted,
       sortOrder: sortOrder ?? this.sortOrder,
       createdAt: createdAt ?? this.createdAt,

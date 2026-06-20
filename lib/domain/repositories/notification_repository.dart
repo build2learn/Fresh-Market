@@ -7,4 +7,5 @@ abstract interface class NotificationRepository {
   Stream<List<NotificationEntity>> watchNotifications(String userId);
   Future<Result<void>> markAsRead(String notificationId);
   Future<Result<void>> markAllAsRead(String userId);
+  Future<Result<NotificationEntity>> createNotification(NotificationEntity notification);
 }

@@ -17,6 +17,8 @@ abstract interface class ProductFirebaseDataSource {
   Future<void> deleteProduct(String productId);
   Future<void> toggleFeatured(String productId, bool isFeatured);
   Future<void> toggleAvailability(String productId, bool isAvailable);
+  Future<void> adjustStock(String productId, int newQuantity, {String? reasonEn, String? reasonAr});
+  Future<void> receiveStock(String productId, int quantityToAdd, {String? reasonEn, String? reasonAr});
 }
 
 class ProductFirebaseDataSourceImpl implements ProductFirebaseDataSource {
@@ -224,6 +226,109 @@ class ProductFirebaseDataSourceImpl implements ProductFirebaseDataSource {
     } on FirebaseException catch (e) {
       throw FirestoreException(
         message: e.message ?? 'Failed to toggle availability',
+        code: e.code,
+      );
+    }
+  }
+
+  @override
+  Future<void> adjustStock(String productId, int newQuantity, {String? reasonEn, String? reasonAr}) async {
+    try {
+      final docRef = _collection.doc(productId);
+      final productSnap = await docRef.get();
+      if (!productSnap.exists) {
+        throw const FirestoreException(message: 'Product not found');
+      }
+      final data = productSnap.data()!;
+      final nameAr = data['nameAr'] as String? ?? '';
+      final nameEn = data['nameEn'] as String? ?? '';
+      final curStock = data['currentStock'] as int? ?? data['stockQuantity'] as int? ?? 50;
+      final resStock = data['reservedStock'] as int? ?? 0;
+      final avStock = data['availableStock'] as int? ?? data['stockQuantity'] as int? ?? (curStock - resStock);
+
+      final newAvailable = newQuantity - resStock;
+
+      final batch = _firestore.batch();
+      batch.update(docRef, {
+        'currentStock': newQuantity,
+        'availableStock': newAvailable,
+        'stockQuantity': newAvailable, // legacy sync
+        FirestoreConstants.updatedAt: DateTime.now(),
+      });
+
+      // Log movement to stock_history
+      final historyRef = _firestore.collection('stock_history').doc();
+      batch.set(historyRef, {
+        'id': historyRef.id,
+        'productId': productId,
+        'productNameAr': nameAr,
+        'productNameEn': nameEn,
+        'type': 'adjustment',
+        'quantityChanged': newQuantity - curStock,
+        'previousStock': curStock, // physical stock change
+        'newStock': newQuantity,
+        'reasonAr': reasonAr ?? 'تعديل المخزون بواسطة المسؤول',
+        'reasonEn': reasonEn ?? 'Stock adjusted by admin',
+        'createdAt': FieldValue.serverTimestamp(),
+        'createdBy': 'admin',
+      });
+
+      await batch.commit();
+    } on FirebaseException catch (e) {
+      throw FirestoreException(
+        message: e.message ?? 'Failed to adjust stock',
+        code: e.code,
+      );
+    }
+  }
+
+  @override
+  Future<void> receiveStock(String productId, int quantityToAdd, {String? reasonEn, String? reasonAr}) async {
+    try {
+      final docRef = _collection.doc(productId);
+      final productSnap = await docRef.get();
+      if (!productSnap.exists) {
+        throw const FirestoreException(message: 'Product not found');
+      }
+      final data = productSnap.data()!;
+      final nameAr = data['nameAr'] as String? ?? '';
+      final nameEn = data['nameEn'] as String? ?? '';
+      final curStock = data['currentStock'] as int? ?? data['stockQuantity'] as int? ?? 50;
+      final resStock = data['reservedStock'] as int? ?? 0;
+      final avStock = data['availableStock'] as int? ?? data['stockQuantity'] as int? ?? (curStock - resStock);
+
+      final newCurrent = curStock + quantityToAdd;
+      final newAvailable = avStock + quantityToAdd;
+
+      final batch = _firestore.batch();
+      batch.update(docRef, {
+        'currentStock': newCurrent,
+        'availableStock': newAvailable,
+        'stockQuantity': newAvailable, // legacy sync
+        FirestoreConstants.updatedAt: DateTime.now(),
+      });
+
+      // Log movement to stock_history
+      final historyRef = _firestore.collection('stock_history').doc();
+      batch.set(historyRef, {
+        'id': historyRef.id,
+        'productId': productId,
+        'productNameAr': nameAr,
+        'productNameEn': nameEn,
+        'type': 'receipt',
+        'quantityChanged': quantityToAdd,
+        'previousStock': curStock, // physical stock change
+        'newStock': newCurrent,
+        'reasonAr': reasonAr ?? 'استلام مخزون جديد بواسطة المسؤول',
+        'reasonEn': reasonEn ?? 'Stock received by admin',
+        'createdAt': FieldValue.serverTimestamp(),
+        'createdBy': 'admin',
+      });
+
+      await batch.commit();
+    } on FirebaseException catch (e) {
+      throw FirestoreException(
+        message: e.message ?? 'Failed to receive stock',
         code: e.code,
       );
     }

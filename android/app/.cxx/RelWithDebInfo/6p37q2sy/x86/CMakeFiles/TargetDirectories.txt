@@ -1,0 +1,2 @@
+E:/Development/Projects/Fresh Market/android/app/.cxx/RelWithDebInfo/6p37q2sy/x86/CMakeFiles/edit_cache.dir
+E:/Development/Projects/Fresh Market/android/app/.cxx/RelWithDebInfo/6p37q2sy/x86/CMakeFiles/rebuild_cache.dir

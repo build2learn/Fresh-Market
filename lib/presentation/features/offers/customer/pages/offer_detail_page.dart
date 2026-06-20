@@ -173,7 +173,7 @@ class OfferDetailPage extends ConsumerWidget {
                           isRtl ? product.nameAr : product.nameEn,
                         ),
                         subtitle: Text(
-                          context.l10n.priceFormat(product.price.toStringAsFixed(2)),
+                          context.formatPrice(product.price),
                         ),
                         onTap: () => context.push(
                           RouteConstants.productDetailPath(product.id),

@@ -14,8 +14,13 @@ abstract final class RouteConstants {
   static const String notifications = '/notifications';
   static const String profile = '/profile';
   static const String settings = '/settings';
+  static const String cart = '/cart';
+  static const String myOrders = '/orders';
+  static const String orderDetail = '/orders/:id';
 
   static const String admin = '/admin';
+  static const String adminOrders = '/admin/orders';
+  static const String adminOrderDetail = '/admin/orders/:id';
   static const String adminProducts = '/admin/products';
   static const String adminProductNew = '/admin/products/new';
   static const String adminProductEdit = '/admin/products/:id';
@@ -29,7 +34,23 @@ abstract final class RouteConstants {
   static const String adminBannerNew = '/admin/banners/new';
   static const String adminBannerEdit = '/admin/banners/:id';
   static const String adminUsers = '/admin/users';
+  static const String adminCustomers = '/admin/customers';
+  static const String adminWarehouse = '/admin/warehouse';
+  static const String adminDelivery = '/admin/delivery';
+  static const String adminTreasury = '/admin/treasury';
+  static const String adminEmployees = '/admin/employees';
+  static const String adminNotifications = '/admin/notifications';
+  static const String adminAIAssistant = '/admin/ai-assistant';
+  static const String adminCoupons = '/admin/coupons';
+  static const String adminAnalytics = '/admin/analytics';
+  static const String adminAuditLogs = '/admin/audit-logs';
+  static const String adminReports = '/admin/reports';
   static const String adminSettings = '/admin/settings';
+  static const String adminBatches = '/admin/batches';
+  static const String adminExpenses = '/admin/expenses';
+  static const String adminWeightUnits = '/admin/weight-units';
+  static const String adminWeightUnitNew = '/admin/weight-units/new';
+  static const String adminWeightUnitEdit = '/admin/weight-units/:id';
 
   static String get categoryListPath => '/categories/list';
   static String categoryProductsPath(String id) => '/categories/$id';
@@ -39,4 +60,7 @@ abstract final class RouteConstants {
   static String adminCategoryEditPath(String id) => '/admin/categories/$id';
   static String adminOfferEditPath(String id) => '/admin/offers/$id';
   static String adminBannerEditPath(String id) => '/admin/banners/$id';
+  static String adminWeightUnitEditPath(String id) => '/admin/weight-units/$id';
+  static String adminOrderDetailPath(String id) => '/admin/orders/$id';
+  static String orderDetailPath(String id) => '/orders/$id';
 }

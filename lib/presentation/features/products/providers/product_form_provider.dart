@@ -3,6 +3,13 @@ import 'package:fresh_market/core/utils/result.dart';
 import 'package:fresh_market/domain/entities/product.entity.dart';
 import 'package:fresh_market/domain/usecases/product/create_product.usecase.dart';
 import 'package:fresh_market/domain/usecases/product/update_product.usecase.dart';
+import 'package:fresh_market/domain/usecases/product/get_products.usecase.dart';
+import 'package:fresh_market/domain/repositories/notification_repository.dart';
+import 'package:fresh_market/domain/entities/notification.entity.dart';
+import 'package:fresh_market/core/enums/notification_type.dart';
+import 'package:fresh_market/domain/repositories/audit_log_repository.dart';
+import 'package:fresh_market/domain/entities/audit_log.entity.dart';
+import 'package:fresh_market/domain/entities/user.entity.dart';
 
 class ProductFormState {
   final String nameAr;
@@ -19,6 +26,11 @@ class ProductFormState {
   final bool isSubmitting;
   final String? errorMessage;
   final bool isEditMode;
+  final String productType;
+  final String status;
+  final String stockQuantity;
+  final String minStock;
+  final String alertQuantity;
 
   const ProductFormState({
     this.nameAr = '',
@@ -35,6 +47,11 @@ class ProductFormState {
     this.isSubmitting = false,
     this.errorMessage,
     this.isEditMode = false,
+    this.productType = 'Fresh',
+    this.status = 'Available',
+    this.stockQuantity = '50',
+    this.minStock = '5',
+    this.alertQuantity = '10',
   });
 
   bool get isValid =>
@@ -47,7 +64,18 @@ class ProductFormState {
       double.tryParse(weight) != null &&
       double.parse(weight) > 0 &&
       weightUnitId.isNotEmpty &&
-      categoryId.isNotEmpty;
+      categoryId.isNotEmpty &&
+      productType.isNotEmpty &&
+      status.isNotEmpty &&
+      stockQuantity.isNotEmpty &&
+      int.tryParse(stockQuantity) != null &&
+      int.parse(stockQuantity) >= 0 &&
+      minStock.isNotEmpty &&
+      int.tryParse(minStock) != null &&
+      int.parse(minStock) >= 0 &&
+      alertQuantity.isNotEmpty &&
+      int.tryParse(alertQuantity) != null &&
+      int.parse(alertQuantity) >= 0;
 
   ProductFormState copyWith({
     String? nameAr,
@@ -64,6 +92,11 @@ class ProductFormState {
     bool? isSubmitting,
     String? errorMessage,
     bool? isEditMode,
+    String? productType,
+    String? status,
+    String? stockQuantity,
+    String? minStock,
+    String? alertQuantity,
   }) {
     return ProductFormState(
       nameAr: nameAr ?? this.nameAr,
@@ -80,6 +113,11 @@ class ProductFormState {
       isSubmitting: isSubmitting ?? this.isSubmitting,
       errorMessage: errorMessage ?? this.errorMessage,
       isEditMode: isEditMode ?? this.isEditMode,
+      productType: productType ?? this.productType,
+      status: status ?? this.status,
+      stockQuantity: stockQuantity ?? this.stockQuantity,
+      minStock: minStock ?? this.minStock,
+      alertQuantity: alertQuantity ?? this.alertQuantity,
     );
   }
 
@@ -97,6 +135,11 @@ class ProductFormState {
       isFeatured: entity.isFeatured,
       isAvailable: entity.isAvailable,
       isEditMode: true,
+      productType: entity.productType,
+      status: entity.status,
+      stockQuantity: entity.stockQuantity.toString(),
+      minStock: entity.minStock.toString(),
+      alertQuantity: entity.alertQuantity.toString(),
     );
   }
 }
@@ -104,17 +147,34 @@ class ProductFormState {
 class ProductFormNotifier extends StateNotifier<ProductFormState> {
   final CreateProductUseCase _createProduct;
   final UpdateProductUseCase _updateProduct;
+  final GetProductUseCase _getProduct;
+  final NotificationRepository _notificationRepository;
+  final AuditLogRepository _auditLogRepository;
+  final UserEntity? _currentUser;
   final String? _editId;
+  double? _originalPrice;
 
   ProductFormNotifier({
     required CreateProductUseCase createProduct,
     required UpdateProductUseCase updateProduct,
+    required GetProductUseCase getProduct,
+    required NotificationRepository notificationRepository,
+    required AuditLogRepository auditLogRepository,
+    required UserEntity? currentUser,
     String? editId,
     ProductFormState? initialState,
   })  : _createProduct = createProduct,
         _updateProduct = updateProduct,
+        _getProduct = getProduct,
+        _notificationRepository = notificationRepository,
+        _auditLogRepository = auditLogRepository,
+        _currentUser = currentUser,
         _editId = editId,
-        super(initialState ?? const ProductFormState());
+        super(initialState ?? const ProductFormState()) {
+    if (_editId != null && initialState == null) {
+      _loadFromRepository();
+    }
+  }
 
   void setNameAr(String value) => state = state.copyWith(nameAr: value);
   void setNameEn(String value) => state = state.copyWith(nameEn: value);
@@ -127,6 +187,25 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
   void setCategoryId(String value) => state = state.copyWith(categoryId: value);
   void setFeatured(bool value) => state = state.copyWith(isFeatured: value);
   void setAvailable(bool value) => state = state.copyWith(isAvailable: value);
+  void setProductType(String value) => state = state.copyWith(productType: value);
+  void setStatus(String value) => state = state.copyWith(status: value);
+  void setStockQuantity(String value) => state = state.copyWith(stockQuantity: value);
+  void setMinStock(String value) => state = state.copyWith(minStock: value);
+  void setAlertQuantity(String value) => state = state.copyWith(alertQuantity: value);
+
+  Future<void> _loadFromRepository() async {
+    state = state.copyWith(isSubmitting: true);
+    final result = await _getProduct(_editId!);
+    if (result is Success<ProductEntity>) {
+      _originalPrice = result.data.price;
+      state = ProductFormState.fromEntity(result.data);
+    } else if (result is Failure<ProductEntity>) {
+      state = state.copyWith(
+        isSubmitting: false,
+        errorMessage: result.error.message,
+      );
+    }
+  }
 
   Future<String?> submit({String? imagePath}) async {
     if (!state.isValid) return 'Please fill all required fields';
@@ -148,13 +227,103 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
       isAvailable: state.isAvailable,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
+      productType: state.productType,
+      status: state.status,
+      stockQuantity: int.parse(state.stockQuantity),
+      minStock: int.parse(state.minStock),
+      alertQuantity: int.parse(state.alertQuantity),
     );
 
     final Result result;
     if (_editId != null) {
       result = await _updateProduct(entity, imagePath: imagePath);
+      if (result is Success) {
+        // Audit log
+        if (_currentUser != null) {
+          await _auditLogRepository.createAuditLog(
+            AuditLogEntity(
+              id: '',
+              userId: _currentUser!.id,
+              userEmail: _currentUser!.email,
+              action: 'Update Product',
+              details: 'Updated product ${entity.nameEn} (Stock: ${entity.stockQuantity}, Price: ${entity.price})',
+              timestamp: DateTime.now(),
+            ),
+          );
+        }
+
+        if (_originalPrice != null && _originalPrice != entity.price) {
+          if (_currentUser != null) {
+            await _auditLogRepository.createAuditLog(
+              AuditLogEntity(
+                id: '',
+                userId: _currentUser!.id,
+                userEmail: _currentUser!.email,
+                action: 'Price Changed',
+                details: 'Price of ${entity.nameEn} changed from $_originalPrice to ${entity.price}',
+                timestamp: DateTime.now(),
+              ),
+            );
+          }
+          try {
+            await _notificationRepository.createNotification(
+              NotificationEntity(
+                id: '',
+                userId: 'all',
+                title: 'Price Updated',
+                body: 'Price of ${entity.nameEn} has changed to ${entity.price} EGP',
+                type: NotificationType.product,
+                createdAt: DateTime.now(),
+                data: {
+                  'titleAr': 'تغيير السعر',
+                  'titleEn': 'Price Changed',
+                  'bodyAr': 'تم تغيير سعر ${entity.nameAr} إلى ${entity.price} جنيه مصري',
+                  'bodyEn': 'Price of ${entity.nameEn} has changed to ${entity.price} EGP',
+                  'productId': entity.id,
+                },
+              ),
+            );
+          } catch (_) {}
+        }
+      }
     } else {
       result = await _createProduct(entity, imagePath: imagePath);
+      if (result is Success<ProductEntity>) {
+        final createdProduct = result.data;
+        // Audit log
+        if (_currentUser != null) {
+          await _auditLogRepository.createAuditLog(
+            AuditLogEntity(
+              id: '',
+              userId: _currentUser!.id,
+              userEmail: _currentUser!.email,
+              action: 'Create Product',
+              details: 'Created product ${createdProduct.nameEn} (Stock: ${createdProduct.stockQuantity}, Price: ${createdProduct.price})',
+              timestamp: DateTime.now(),
+            ),
+          );
+        }
+
+        try {
+          await _notificationRepository.createNotification(
+            NotificationEntity(
+              id: '',
+              userId: 'all',
+              title: 'New Product Added',
+              body: '${createdProduct.nameEn} is now available!',
+              type: NotificationType.product,
+              createdAt: DateTime.now(),
+              data: {
+                'titleAr': 'منتج جديد',
+                'titleEn': 'New Product Added',
+                'bodyAr': 'منتج جديد: ${createdProduct.nameAr} متوفر الآن في المتجر!',
+                'bodyEn': 'New product: ${createdProduct.nameEn} is now available in the store!',
+                'productId': createdProduct.id,
+              },
+            ),
+          );
+        } catch (_) {}
+      }
     }
 
     if (result is Success) {

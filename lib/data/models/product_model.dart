@@ -18,6 +18,13 @@ class ProductModel extends ProductDto {
     required super.isAvailable,
     required super.createdAt,
     required super.updatedAt,
+    super.productType = 'Fresh',
+    super.status = 'Available',
+    super.currentStock = 50,
+    super.reservedStock = 0,
+    super.availableStock = 50,
+    super.minimumStock = 5,
+    super.reorderLevel = 10,
   });
 
   factory ProductModel.fromDto(ProductDto dto) {
@@ -37,6 +44,13 @@ class ProductModel extends ProductDto {
       isAvailable: dto.isAvailable,
       createdAt: dto.createdAt,
       updatedAt: dto.updatedAt,
+      productType: dto.productType,
+      status: dto.status,
+      currentStock: dto.currentStock,
+      reservedStock: dto.reservedStock,
+      availableStock: dto.availableStock,
+      minimumStock: dto.minimumStock,
+      reorderLevel: dto.reorderLevel,
     );
   }
 
@@ -57,6 +71,13 @@ class ProductModel extends ProductDto {
       isAvailable: entity.isAvailable,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      productType: entity.productType,
+      status: entity.status,
+      currentStock: entity.currentStock,
+      reservedStock: entity.reservedStock,
+      availableStock: entity.availableStock,
+      minimumStock: entity.minimumStock,
+      reorderLevel: entity.reorderLevel,
     );
   }
 
@@ -77,6 +98,13 @@ class ProductModel extends ProductDto {
       isAvailable: isAvailable,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      productType: productType,
+      status: status,
+      currentStock: currentStock,
+      reservedStock: reservedStock,
+      availableStock: availableStock,
+      minimumStock: minimumStock,
+      reorderLevel: reorderLevel,
     );
   }
 }

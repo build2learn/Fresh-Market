@@ -40,7 +40,7 @@ class ProductCard extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              context.l10n.priceFormat(product.price.toStringAsFixed(2)),
+              context.formatPrice(product.price),
               style: context.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: context.colorScheme.primary,
@@ -53,6 +53,8 @@ class ProductCard extends StatelessWidget {
                 color: context.colorScheme.onSurfaceVariant,
               ),
             ),
+            const SizedBox(height: 4),
+            _buildStockBadge(context),
           ],
         ),
         trailing: Row(
@@ -63,7 +65,7 @@ class ProductCard extends StatelessWidget {
                 product.isFeatured ? Icons.star : Icons.star_border,
                 color: product.isFeatured
                     ? context.colorScheme.tertiary
-                    : context.colorScheme.outline,
+                     : context.colorScheme.outline,
               ),
               tooltip: context.l10n.featured,
               onPressed: onToggleFeatured,
@@ -93,6 +95,51 @@ class ProductCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildStockBadge(BuildContext context) {
+    final stock = product.stockQuantity;
+    final alertQty = product.alertQuantity;
+    final isAr = context.isRtl;
+
+    if (stock == 0) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: context.colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          isAr ? 'نفد من المخزون' : 'Out of Stock',
+          style: context.textTheme.labelSmall?.copyWith(
+            color: context.colorScheme.onErrorContainer,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+    } else if (stock <= alertQty) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: Colors.amber.shade100,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          isAr ? 'مخزون منخفض: $stock' : 'Low Stock: $stock',
+          style: context.textTheme.labelSmall?.copyWith(
+            color: Colors.amber.shade900,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+    } else {
+      return Text(
+        isAr ? 'المخزون: $stock' : 'Stock: $stock',
+        style: context.textTheme.bodySmall?.copyWith(
+          color: context.colorScheme.onSurfaceVariant,
+        ),
+      );
+    }
   }
 
   Widget _buildLeading(BuildContext context) {

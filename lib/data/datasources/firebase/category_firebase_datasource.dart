@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../../../core/constants/firestore_constants.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../dto/category.dto.dart';
@@ -9,8 +11,8 @@ abstract interface class CategoryFirebaseDataSource {
   Future<List<CategoryDto>> getVisibleCategories({int limit});
   Future<List<CategoryDto>> getDeletedCategories({int limit});
   Stream<List<CategoryDto>> watchCategories({int limit});
-  Future<CategoryDto> createCategory(CategoryDto category);
-  Future<CategoryDto> updateCategory(CategoryDto category);
+  Future<CategoryDto> createCategory(CategoryDto category, {String? imagePath});
+  Future<CategoryDto> updateCategory(CategoryDto category, {String? imagePath});
   Future<void> toggleVisibility(String categoryId, bool isVisible);
   Future<void> reorderCategories(List<String> categoryIds);
   Future<void> softDeleteCategory(String categoryId);
@@ -19,9 +21,15 @@ abstract interface class CategoryFirebaseDataSource {
 
 class CategoryFirebaseDataSourceImpl implements CategoryFirebaseDataSource {
   final FirebaseFirestore _firestore;
+  final FirebaseStorage _storage;
 
-  CategoryFirebaseDataSourceImpl({required FirebaseFirestore firestore})
-      : _firestore = firestore;
+  CategoryFirebaseDataSourceImpl({
+    required FirebaseFirestore firestore,
+    FirebaseStorage? storage,
+  })  : _firestore = firestore,
+        _storage = storage ?? FirebaseStorage.instance;
+
+  String get _categoriesImagesPath => 'categories/images';
 
   CollectionReference<Map<String, dynamic>> get _collection =>
       _firestore.collection(FirestoreConstants.categories);
@@ -97,11 +105,16 @@ class CategoryFirebaseDataSourceImpl implements CategoryFirebaseDataSource {
   }
 
   @override
-  Future<CategoryDto> createCategory(CategoryDto category) async {
+  Future<CategoryDto> createCategory(CategoryDto category, {String? imagePath}) async {
     try {
+      String? imageUrl = category.imageUrl;
+      if (imagePath != null) {
+        imageUrl = await _uploadImage(imagePath, _categoriesImagesPath);
+      }
       final docRef = _collection.doc(category.id);
       final now = DateTime.now();
       await docRef.set(category.copyWith(
+        imageUrl: imageUrl,
         createdAt: now,
         updatedAt: now,
       ).toMap());
@@ -116,10 +129,20 @@ class CategoryFirebaseDataSourceImpl implements CategoryFirebaseDataSource {
   }
 
   @override
-  Future<CategoryDto> updateCategory(CategoryDto category) async {
+  Future<CategoryDto> updateCategory(CategoryDto category, {String? imagePath}) async {
     try {
+      String? imageUrl = category.imageUrl;
+      if (imagePath != null) {
+        if (category.imageUrl != null) {
+          await _deleteImage(category.imageUrl!);
+        }
+        imageUrl = await _uploadImage(imagePath, _categoriesImagesPath);
+      }
       final now = DateTime.now();
-      final data = category.copyWith(updatedAt: now).toMap();
+      final data = category.copyWith(
+        imageUrl: imageUrl,
+        updatedAt: now,
+      ).toMap();
       await _collection.doc(category.id).update(data);
       final updatedDoc = await _collection.doc(category.id).get();
       return CategoryDto.fromMap(updatedDoc.data()!, updatedDoc.id);
@@ -197,5 +220,20 @@ class CategoryFirebaseDataSourceImpl implements CategoryFirebaseDataSource {
         code: e.code,
       );
     }
+  }
+
+  Future<String> _uploadImage(String filePath, String storagePath) async {
+    final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final ref = _storage.ref('$storagePath/$fileName');
+    final file = File(filePath);
+    final uploadTask = await ref.putFile(file);
+    return await uploadTask.ref.getDownloadURL();
+  }
+
+  Future<void> _deleteImage(String imageUrl) async {
+    try {
+      final ref = _storage.refFromURL(imageUrl);
+      await ref.delete();
+    } catch (_) {}
   }
 }

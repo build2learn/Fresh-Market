@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fresh_market/data/providers/offer_repository_provider.dart';
+import 'package:fresh_market/data/providers/notification_repository_provider.dart';
+import 'package:fresh_market/data/providers/audit_log_repository_provider.dart';
+import 'package:fresh_market/presentation/features/auth/providers/auth_providers.dart';
 import 'package:fresh_market/domain/usecases/offer/create_offer.usecase.dart';
 import 'package:fresh_market/domain/usecases/offer/delete_offer.usecase.dart';
 import 'package:fresh_market/domain/usecases/offer/get_offers.usecase.dart';
@@ -64,12 +67,16 @@ final offerListProvider =
   );
 });
 
-final offerFormProvider = StateNotifierProvider.family.autoDispose<OfferFormNotifier, OfferFormState, String?>(
-  (ref, editId) {
-    return OfferFormNotifier(
-      createOffer: ref.watch(_createOfferUseCaseProvider),
-      updateOffer: ref.watch(_updateOfferUseCaseProvider),
-      editId: editId,
-    );
-  },
-);
+final offerFormProvider = StateNotifierProvider.family.autoDispose<
+    OfferFormNotifier, OfferFormState, String?>((ref, editId) {
+  return OfferFormNotifier(
+    createOffer: ref.watch(_createOfferUseCaseProvider),
+    updateOffer: ref.watch(_updateOfferUseCaseProvider),
+    getOffer: ref.watch(getOfferUseCaseProvider),
+    getOfferProducts: ref.watch(getOfferProductsUseCaseProvider),
+    notificationRepository: ref.watch(notificationRepositoryProvider),
+    auditLogRepository: ref.watch(auditLogRepositoryProvider),
+    currentUser: ref.watch(currentUserProvider),
+    editId: editId,
+  );
+});

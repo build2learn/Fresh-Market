@@ -6,6 +6,7 @@ class CategoryDto {
   final String nameEn;
   final String? imageUrl;
   final bool isVisible;
+  final bool isActive;
   final bool isDeleted;
   final int sortOrder;
   final DateTime createdAt;
@@ -17,6 +18,7 @@ class CategoryDto {
     required this.nameEn,
     this.imageUrl,
     required this.isVisible,
+    this.isActive = true,
     this.isDeleted = false,
     required this.sortOrder,
     required this.createdAt,
@@ -39,6 +41,7 @@ class CategoryDto {
       nameEn: map['nameEn'] as String? ?? '',
       imageUrl: map['imageUrl'] as String?,
       isVisible: map[FirestoreConstants.isVisible] as bool? ?? true,
+      isActive: map[FirestoreConstants.isActive] as bool? ?? true,
       isDeleted: map[FirestoreConstants.isDeleted] as bool? ?? false,
       sortOrder: map[FirestoreConstants.sortOrder] as int? ?? 0,
       createdAt: _toDateTime(map[FirestoreConstants.createdAt]),
@@ -53,6 +56,7 @@ class CategoryDto {
       'nameEn': nameEn,
       'imageUrl': imageUrl,
       FirestoreConstants.isVisible: isVisible,
+      FirestoreConstants.isActive: isActive,
       FirestoreConstants.isDeleted: isDeleted,
       FirestoreConstants.sortOrder: sortOrder,
       FirestoreConstants.createdAt: createdAt,
@@ -66,6 +70,7 @@ class CategoryDto {
     String? nameEn,
     String? imageUrl,
     bool? isVisible,
+    bool? isActive,
     bool? isDeleted,
     int? sortOrder,
     DateTime? createdAt,
@@ -77,6 +82,7 @@ class CategoryDto {
       nameEn: nameEn ?? this.nameEn,
       imageUrl: imageUrl ?? this.imageUrl,
       isVisible: isVisible ?? this.isVisible,
+      isActive: isActive ?? this.isActive,
       isDeleted: isDeleted ?? this.isDeleted,
       sortOrder: sortOrder ?? this.sortOrder,
       createdAt: createdAt ?? this.createdAt,

@@ -161,9 +161,64 @@ class ProductRepositoryImpl implements ProductRepository {
     }
   }
 
+  @override
+  Future<Result<List<ProductEntity>>> searchProducts(String query) async {
+    try {
+      final dtos = await _firebaseDataSource.getProducts(limit: 100);
+      final entities = dtos.map((dto) => ProductModel.fromDto(dto).toEntity()).toList();
+      final lowercaseQuery = query.toLowerCase();
+      final filtered = entities.where((p) {
+        return p.nameAr.toLowerCase().contains(lowercaseQuery) ||
+               p.nameEn.toLowerCase().contains(lowercaseQuery) ||
+               (p.descriptionAr?.toLowerCase().contains(lowercaseQuery) ?? false) ||
+               (p.descriptionEn?.toLowerCase().contains(lowercaseQuery) ?? false);
+      }).toList();
+      return Success(filtered);
+    } catch (e) {
+      try {
+        final cached = await _localDataSource.getAll();
+        final entities = cached.map((dto) => ProductModel.fromDto(dto).toEntity()).toList();
+        final lowercaseQuery = query.toLowerCase();
+        final filtered = entities.where((p) {
+          return p.nameAr.toLowerCase().contains(lowercaseQuery) ||
+                 p.nameEn.toLowerCase().contains(lowercaseQuery) ||
+                 (p.descriptionAr?.toLowerCase().contains(lowercaseQuery) ?? false) ||
+                 (p.descriptionEn?.toLowerCase().contains(lowercaseQuery) ?? false);
+        }).toList();
+        return Success(filtered);
+      } catch (err) {
+        return Failure(FirestoreException(message: err.toString()));
+      }
+    }
+  }
+
   String _generateId() {
     final random = Random();
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
     return List.generate(20, (_) => chars[random.nextInt(chars.length)]).join();
+  }
+
+  @override
+  Future<Result<void>> adjustStock(String productId, int newQuantity, {String? reasonEn, String? reasonAr}) async {
+    try {
+      await _firebaseDataSource.adjustStock(productId, newQuantity, reasonEn: reasonEn, reasonAr: reasonAr);
+      return const Success(null);
+    } on AppException catch (e) {
+      return Failure(e);
+    } catch (e) {
+      return Failure(FirestoreException(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> receiveStock(String productId, int quantityToAdd, {String? reasonEn, String? reasonAr}) async {
+    try {
+      await _firebaseDataSource.receiveStock(productId, quantityToAdd, reasonEn: reasonEn, reasonAr: reasonAr);
+      return const Success(null);
+    } on AppException catch (e) {
+      return Failure(e);
+    } catch (e) {
+      return Failure(FirestoreException(message: e.toString()));
+    }
   }
 }

@@ -15,6 +15,9 @@ class UserModel extends UserDto {
     super.lastLoginAt,
     required super.createdAt,
     required super.updatedAt,
+    super.loyaltyPoints = 0,
+    super.lifetimePoints = 0,
+    super.membershipLevel = 'Bronze',
   });
 
   factory UserModel.fromDto(UserDto dto) {
@@ -30,6 +33,9 @@ class UserModel extends UserDto {
       lastLoginAt: dto.lastLoginAt,
       createdAt: dto.createdAt,
       updatedAt: dto.updatedAt,
+      loyaltyPoints: dto.loyaltyPoints,
+      lifetimePoints: dto.lifetimePoints,
+      membershipLevel: dto.membershipLevel,
     );
   }
 
@@ -46,6 +52,9 @@ class UserModel extends UserDto {
       lastLoginAt: entity.lastLoginAt,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      loyaltyPoints: entity.loyaltyPoints,
+      lifetimePoints: entity.lifetimePoints,
+      membershipLevel: entity.membershipLevel,
     );
   }
 
@@ -62,6 +71,9 @@ class UserModel extends UserDto {
       lastLoginAt: lastLoginAt,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      loyaltyPoints: loyaltyPoints,
+      lifetimePoints: lifetimePoints,
+      membershipLevel: membershipLevel,
     );
   }
 }

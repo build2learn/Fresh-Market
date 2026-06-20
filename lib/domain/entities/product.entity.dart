@@ -16,6 +16,18 @@ class ProductEntity extends Equatable {
   final bool isAvailable;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String productType;
+  final String status;
+  final int currentStock;
+  final int reservedStock;
+  final int availableStock;
+  final int minimumStock;
+  final int reorderLevel;
+
+  // Getters for legacy fields to ensure zero breaking changes in client code
+  int get stockQuantity => availableStock;
+  int get minStock => minimumStock;
+  int get alertQuantity => reorderLevel;
 
   const ProductEntity({
     required this.id,
@@ -33,7 +45,21 @@ class ProductEntity extends Equatable {
     this.isAvailable = true,
     required this.createdAt,
     required this.updatedAt,
-  });
+    this.productType = 'Fresh',
+    this.status = 'Available',
+    int currentStock = 50,
+    this.reservedStock = 0,
+    int? availableStock,
+    int minimumStock = 5,
+    int reorderLevel = 10,
+    // Legacy support
+    int? stockQuantity,
+    int? minStock,
+    int? alertQuantity,
+  }) : this.currentStock = stockQuantity ?? currentStock,
+       this.availableStock = availableStock ?? stockQuantity ?? ((stockQuantity ?? currentStock) - reservedStock),
+       this.minimumStock = minStock ?? minimumStock,
+       this.reorderLevel = alertQuantity ?? reorderLevel;
 
   @override
   List<Object?> get props => [
@@ -52,6 +78,13 @@ class ProductEntity extends Equatable {
     isAvailable,
     createdAt,
     updatedAt,
+    productType,
+    status,
+    currentStock,
+    reservedStock,
+    availableStock,
+    minimumStock,
+    reorderLevel,
   ];
 
   ProductEntity copyWith({
@@ -70,6 +103,17 @@ class ProductEntity extends Equatable {
     bool? isAvailable,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? productType,
+    String? status,
+    int? currentStock,
+    int? reservedStock,
+    int? availableStock,
+    int? minimumStock,
+    int? reorderLevel,
+    // Legacy support
+    int? stockQuantity,
+    int? minStock,
+    int? alertQuantity,
   }) {
     return ProductEntity(
       id: id ?? this.id,
@@ -87,6 +131,13 @@ class ProductEntity extends Equatable {
       isAvailable: isAvailable ?? this.isAvailable,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      productType: productType ?? this.productType,
+      status: status ?? this.status,
+      currentStock: stockQuantity ?? currentStock ?? this.currentStock,
+      reservedStock: reservedStock ?? this.reservedStock,
+      availableStock: availableStock ?? stockQuantity ?? this.availableStock,
+      minimumStock: minStock ?? minimumStock ?? this.minimumStock,
+      reorderLevel: alertQuantity ?? reorderLevel ?? this.reorderLevel,
     );
   }
 }

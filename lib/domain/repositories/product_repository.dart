@@ -8,6 +8,7 @@ abstract interface class ProductRepository {
     dynamic lastDoc,
     String? categoryId,
   });
+  Future<Result<List<ProductEntity>>> searchProducts(String query);
   Future<Result<ProductEntity>> getProduct(String id);
   Future<Result<List<ProductEntity>>> getFeaturedProducts({int limit = 20});
   Stream<List<ProductEntity>> watchProducts({int limit = 20});
@@ -17,4 +18,6 @@ abstract interface class ProductRepository {
   Future<Result<void>> deleteProduct(String productId);
   Future<Result<void>> toggleFeatured(String productId, bool isFeatured);
   Future<Result<void>> toggleAvailability(String productId, bool isAvailable);
+  Future<Result<void>> adjustStock(String productId, int newQuantity, {String? reasonEn, String? reasonAr});
+  Future<Result<void>> receiveStock(String productId, int quantityToAdd, {String? reasonEn, String? reasonAr});
 }

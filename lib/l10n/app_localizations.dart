@@ -1298,7 +1298,7 @@ abstract class AppLocalizations {
   /// No description provided for @priceFormat.
   ///
   /// In en, this message translates to:
-  /// **'{price} SAR'**
+  /// **'{price} EGP'**
   String priceFormat(Object price);
 
   /// No description provided for @weightFormat.
@@ -1337,17 +1337,173 @@ abstract class AppLocalizations {
   /// **'Page not found'**
   String get pageNotFound;
 
-  /// No description provided for @pageNotFoundDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'The page you are looking for does not exist.'**
-  String get pageNotFoundDesc;
-
   /// No description provided for @maintenanceMessage.
   ///
   /// In en, this message translates to:
   /// **'We are currently under maintenance. Please check back later.'**
   String get maintenanceMessage;
+
+  /// No description provided for @contactPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Phone'**
+  String get contactPhone;
+
+  /// No description provided for @contactWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact WhatsApp'**
+  String get contactWhatsApp;
+
+  /// No description provided for @contactInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Information'**
+  String get contactInfo;
+
+  /// No description provided for @settingsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings saved successfully'**
+  String get settingsSaved;
+
+  /// No description provided for @cartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping Cart'**
+  String get cartTitle;
+
+  /// No description provided for @addToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Cart'**
+  String get addToCart;
+
+  /// No description provided for @removeFromCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Cart'**
+  String get removeFromCart;
+
+  /// No description provided for @checkout.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout'**
+  String get checkout;
+
+  /// No description provided for @cartEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cart is empty'**
+  String get cartEmpty;
+
+  /// No description provided for @cartTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Amount'**
+  String get cartTotal;
+
+  /// No description provided for @ordersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders Management'**
+  String get ordersTitle;
+
+  /// No description provided for @orderStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Status'**
+  String get orderStatus;
+
+  /// No description provided for @statusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get statusPending;
+
+  /// No description provided for @statusConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get statusConfirmed;
+
+  /// No description provided for @statusPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing'**
+  String get statusPreparing;
+
+  /// No description provided for @statusOutForDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Out For Delivery'**
+  String get statusOutForDelivery;
+
+  /// No description provided for @statusDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get statusDelivered;
+
+  /// No description provided for @statusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get statusCancelled;
+
+  /// No description provided for @searchOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by Order ID or Email...'**
+  String get searchOrders;
+
+  /// No description provided for @noOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders found'**
+  String get noOrders;
+
+  /// No description provided for @orderId.
+  ///
+  /// In en, this message translates to:
+  /// **'Order ID'**
+  String get orderId;
+
+  /// No description provided for @customerEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer Email'**
+  String get customerEmail;
+
+  /// No description provided for @orderDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Date'**
+  String get orderDate;
+
+  /// No description provided for @items.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get items;
+
+  /// No description provided for @quantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get quantity;
+
+  /// No description provided for @statusUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Order status updated successfully'**
+  String get statusUpdated;
+
+  /// No description provided for @cartSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Order placed successfully!'**
+  String get cartSuccess;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

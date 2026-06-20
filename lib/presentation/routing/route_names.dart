@@ -14,8 +14,13 @@ abstract final class RouteNames {
   static const String notifications = 'notifications';
   static const String profile = 'profile';
   static const String settings = 'settings';
+  static const String cart = 'cart';
+  static const String myOrders = 'myOrders';
+  static const String orderDetail = 'orderDetail';
 
   static const String admin = 'admin';
+  static const String adminOrders = 'adminOrders';
+  static const String adminOrderDetail = 'adminOrderDetail';
   static const String adminProducts = 'adminProducts';
   static const String adminProductNew = 'adminProductNew';
   static const String adminProductEdit = 'adminProductEdit';
@@ -29,5 +34,9 @@ abstract final class RouteNames {
   static const String adminBannerNew = 'adminBannerNew';
   static const String adminBannerEdit = 'adminBannerEdit';
   static const String adminUsers = 'adminUsers';
+  static const String adminReports = 'adminReports';
   static const String adminSettings = 'adminSettings';
+  static const String adminWeightUnits = 'adminWeightUnits';
+  static const String adminWeightUnitNew = 'adminWeightUnitNew';
+  static const String adminWeightUnitEdit = 'adminWeightUnitEdit';
 }

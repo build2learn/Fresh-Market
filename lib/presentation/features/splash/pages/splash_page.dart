@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fresh_market/core/constants/route_constants.dart';
 import 'package:fresh_market/core/extensions/context_extensions.dart';
-import 'package:fresh_market/presentation/providers/app_providers.dart';
+import 'package:fresh_market/presentation/features/auth/providers/auth_providers.dart';
+import 'package:fresh_market/presentation/features/settings/providers/settings_provider.dart';
+
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -19,20 +21,6 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   void initState() {
     super.initState();
     debugPrint('[SPLASH] initState');
-
-    ref.listen(firebaseReadyProvider, (prev, next) {
-      if (next is AsyncData) {
-        debugPrint('[SPLASH] Firebase ready');
-        _maybeNavigate();
-      }
-    });
-
-    ref.listen(authNotifierProvider, (prev, next) {
-      if (!next.isUninitialized) {
-        debugPrint('[SPLASH] Auth resolved');
-        _maybeNavigate();
-      }
-    });
 
     Future.microtask(() {
       if (mounted) {
@@ -72,8 +60,23 @@ class _SplashPageState extends ConsumerState<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(firebaseReadyProvider, (prev, next) {
+      if (next is AsyncData) {
+        debugPrint('[SPLASH] Firebase ready');
+        _maybeNavigate();
+      }
+    });
+
+    ref.listen(authNotifierProvider, (prev, next) {
+      if (!next.isUninitialized) {
+        debugPrint('[SPLASH] Auth resolved');
+        _maybeNavigate();
+      }
+    });
+
     final firebaseAsync = ref.watch(firebaseReadyProvider);
     final authState = ref.watch(authNotifierProvider);
+    final settings = ref.watch(settingsProvider);
 
     debugPrint('[SPLASH] splash created');
     debugPrint('[SPLASH] firebaseReadyProvider state: ${firebaseAsync.runtimeType}');
@@ -88,7 +91,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
             children: [
               Icon(Icons.store, size: 80, color: context.colorScheme.primary),
               const SizedBox(height: 16),
-              Text('Fresh Market', style: context.textTheme.headlineMedium?.copyWith(
+              Text(settings.storeName, style: context.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold, color: context.colorScheme.primary,
               )),
               const SizedBox(height: 32),

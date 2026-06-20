@@ -13,6 +13,9 @@ class UserDto {
   final DateTime? lastLoginAt;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final int loyaltyPoints;
+  final int lifetimePoints;
+  final String membershipLevel;
 
   const UserDto({
     required this.id,
@@ -26,6 +29,9 @@ class UserDto {
     this.lastLoginAt,
     required this.createdAt,
     required this.updatedAt,
+    this.loyaltyPoints = 0,
+    this.lifetimePoints = 0,
+    this.membershipLevel = 'Bronze',
   });
 
   static DateTime? _toDateTimeOrNull(dynamic value) {
@@ -59,6 +65,9 @@ class UserDto {
       lastLoginAt: _toDateTimeOrNull(map['lastLoginAt']),
       createdAt: _toDateTime(map[FirestoreConstants.createdAt]),
       updatedAt: _toDateTime(map[FirestoreConstants.updatedAt]),
+      loyaltyPoints: map['loyaltyPoints'] as int? ?? 0,
+      lifetimePoints: map['lifetimePoints'] as int? ?? 0,
+      membershipLevel: map['membershipLevel'] as String? ?? 'Bronze',
     );
   }
 
@@ -74,6 +83,9 @@ class UserDto {
       'lastLoginAt': lastLoginAt,
       FirestoreConstants.createdAt: createdAt,
       FirestoreConstants.updatedAt: updatedAt,
+      'loyaltyPoints': loyaltyPoints,
+      'lifetimePoints': lifetimePoints,
+      'membershipLevel': membershipLevel,
     };
   }
 
@@ -89,6 +101,9 @@ class UserDto {
     DateTime? lastLoginAt,
     DateTime? createdAt,
     DateTime? updatedAt,
+    int? loyaltyPoints,
+    int? lifetimePoints,
+    String? membershipLevel,
   }) {
     return UserDto(
       id: id ?? this.id,
@@ -102,6 +117,9 @@ class UserDto {
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      loyaltyPoints: loyaltyPoints ?? this.loyaltyPoints,
+      lifetimePoints: lifetimePoints ?? this.lifetimePoints,
+      membershipLevel: membershipLevel ?? this.membershipLevel,
     );
   }
 }

@@ -9,6 +9,9 @@ import 'package:fresh_market/domain/usecases/auth/sign_up.usecase.dart';
 import 'package:fresh_market/domain/usecases/auth/sign_out.usecase.dart';
 import 'package:fresh_market/domain/usecases/auth/send_password_reset.usecase.dart';
 import 'package:fresh_market/domain/usecases/auth/get_current_user.usecase.dart';
+import 'package:fresh_market/domain/repositories/user_repository.dart';
+import 'package:fresh_market/data/providers/user_repository_provider.dart';
+import 'package:fresh_market/core/services/notification_service.dart';
 
 final signInUseCaseProvider = Provider<SignInUseCase>((ref) {
   return SignInUseCase(ref.watch(authRepositoryProvider));
@@ -64,6 +67,7 @@ class AuthState {
   }
 
   bool get isAuthenticated => status == AuthStatus.authenticated;
+  bool get isUninitialized => status == AuthStatus.uninitialized;
   bool get isAdmin => user?.isAdmin ?? false;
 }
 
@@ -73,6 +77,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final SignUpUseCase _signUp;
   final SignOutUseCase _signOut;
   final SendPasswordResetUseCase _sendPasswordReset;
+  final UserRepository _userRepository;
 
   AuthNotifier({
     required WatchAuthStateUseCase watchAuthState,
@@ -80,11 +85,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required SignUpUseCase signUp,
     required SignOutUseCase signOut,
     required SendPasswordResetUseCase sendPasswordReset,
+    required UserRepository userRepository,
   })  : _watchAuthState = watchAuthState,
         _signIn = signIn,
         _signUp = signUp,
         _signOut = signOut,
         _sendPasswordReset = sendPasswordReset,
+        _userRepository = userRepository,
         super(const AuthState()) {
     _init();
   }
@@ -103,6 +110,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
             status: AuthStatus.authenticated,
             user: user,
           );
+          _syncFcmToken(user.id);
         } else {
           debugPrint('[AUTH] Auth state stream: unauthenticated (user=null)');
           state = const AuthState(status: AuthStatus.unauthenticated);
@@ -189,6 +197,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void clearError() {
     state = state.copyWith(errorMessage: null);
   }
+
+  Future<void> refreshUser() async {
+    final user = state.user;
+    if (user != null) {
+      final result = await _userRepository.getUser(user.id);
+      if (result is Success<UserEntity>) {
+        state = state.copyWith(user: result.data);
+      }
+    }
+  }
+
+  Future<void> _syncFcmToken(String userId) async {
+    try {
+      final token = NotificationService.instance.fcmToken;
+      if (token != null) {
+        debugPrint('[AUTH] Syncing FCM token for user $userId: $token');
+        await _userRepository.updateFcmToken(userId, token);
+      } else {
+        debugPrint('[AUTH] No FCM token found to sync for user $userId');
+      }
+    } catch (e) {
+      debugPrint('[AUTH] Failed to sync FCM token: $e');
+    }
+  }
 }
 
 final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
@@ -199,6 +231,7 @@ final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref
     signUp: ref.watch(signUpUseCaseProvider),
     signOut: ref.watch(signOutUseCaseProvider),
     sendPasswordReset: ref.watch(sendPasswordResetUseCaseProvider),
+    userRepository: ref.watch(userRepositoryProvider),
   );
 });
 
@@ -213,3 +246,8 @@ final isAdminProvider = Provider<bool>((ref) {
 final currentUserProvider = Provider<UserEntity?>((ref) {
   return ref.watch(authNotifierProvider).user;
 });
+
+final firebaseReadyProvider = FutureProvider<bool>((ref) async {
+  return true;
+});
+

@@ -15,4 +15,10 @@ abstract interface class UserRepository {
     String? fcmToken,
   });
   Future<Result<UserEntity>> updateFcmToken(String userId, String token);
+  Future<Result<UserEntity>> updateLoyalty(
+    String userId, {
+    required int loyaltyPoints,
+    required int lifetimePoints,
+    required String membershipLevel,
+  });
 }

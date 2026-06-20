@@ -9,7 +9,7 @@ class CreateCategoryUseCase {
   CreateCategoryUseCase({required CategoryRepository repository})
       : _repository = repository;
 
-  Future<Result<CategoryEntity>> call(CategoryEntity category) {
+  Future<Result<CategoryEntity>> call(CategoryEntity category, {String? imagePath}) {
     if (category.nameAr.trim().isEmpty) {
       return Future.value(Failure(
         ValidationException(message: 'Arabic name is required', code: 'validation'),
@@ -20,6 +20,6 @@ class CreateCategoryUseCase {
         ValidationException(message: 'English name is required', code: 'validation'),
       ));
     }
-    return _repository.createCategory(category);
+    return _repository.createCategory(category, imagePath: imagePath);
   }
 }

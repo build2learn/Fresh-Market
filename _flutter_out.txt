@@ -1,0 +1,9 @@
+Launching lib\main.dart on Web Server in release mode...
+Compiling lib\main.dart for the Web...                             813ms
+√ Built build\web
+lib\main.dart is being served at http://localhost:8107
+The web-server device requires the Dart Debug Chrome extension for debugging. Consider using the Chrome or Edge devices for an improved development workflow.
+
+  To hot restart changes while running, press "r" or "R".
+For a more detailed help message, press "h". To quit, press "q".
+

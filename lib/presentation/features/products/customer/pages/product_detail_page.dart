@@ -5,12 +5,16 @@ import 'package:fresh_market/core/utils/result.dart';
 import 'package:fresh_market/domain/entities/product.entity.dart';
 import 'package:fresh_market/data/providers/product_repository_provider.dart';
 
+import 'package:fresh_market/presentation/features/cart/providers/cart_provider.dart';
+
 final _productDetailProvider = FutureProvider.family<ProductEntity?, String>((ref, id) async {
   final repo = ref.watch(productRepositoryProvider);
   final result = await repo.getProduct(id);
   if (result is Success<ProductEntity>) return result.data;
   return null;
 });
+
+final _quantityProvider = StateProvider.family.autoDispose<int, String>((ref, id) => 1);
 
 class ProductDetailPage extends ConsumerWidget {
   final String productId;
@@ -20,7 +24,8 @@ class ProductDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final productAsync = ref.watch(_productDetailProvider(productId));
-
+    final quantity = ref.watch(_quantityProvider(productId));
+ 
     return Scaffold(
       appBar: AppBar(
         title: Text(context.l10n.productDetail),
@@ -32,13 +37,13 @@ class ProductDetailPage extends ConsumerWidget {
           if (product == null) {
             return Center(child: Text(context.l10n.errorNotFound));
           }
-          return _buildContent(context, product);
+          return _buildContent(context, ref, product, quantity);
         },
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context, ProductEntity product) {
+  Widget _buildContent(BuildContext context, WidgetRef ref, ProductEntity product, int quantity) {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -88,7 +93,7 @@ class ProductDetailPage extends ConsumerWidget {
                 ],
                 const SizedBox(height: 16),
                 Text(
-                  context.l10n.priceFormat(product.price.toStringAsFixed(2)),
+                  context.formatPrice(product.price),
                   style: context.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: context.colorScheme.primary,
@@ -129,6 +134,79 @@ class ProductDetailPage extends ConsumerWidget {
                         ? (product.descriptionAr ?? product.descriptionEn ?? '')
                         : (product.descriptionEn ?? product.descriptionAr ?? ''),
                     style: context.textTheme.bodyMedium,
+                  ),
+                ],
+                const SizedBox(height: 24),
+                // Quantity Selector & Add to Cart
+                if (product.isAvailable) ...[
+                  Card(
+                    elevation: 0,
+                    color: context.colorScheme.surfaceVariant.withOpacity(0.3),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: context.colorScheme.outlineVariant.withOpacity(0.5)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                context.l10n.quantity,
+                                style: context.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  IconButton.filledTonal(
+                                    onPressed: quantity > 1
+                                        ? () => ref.read(_quantityProvider(productId).notifier).state--
+                                        : null,
+                                    icon: const Icon(Icons.remove),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    child: Text(
+                                      '$quantity',
+                                      style: context.textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton.filledTonal(
+                                    onPressed: () => ref.read(_quantityProvider(productId).notifier).state++,
+                                    icon: const Icon(Icons.add),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 48,
+                            child: FilledButton.icon(
+                              onPressed: () {
+                                ref.read(cartProvider.notifier).addToCart(product, quantity: quantity);
+                                context.showSnackBar(
+                                  context.isRtl
+                                      ? 'تمت إضافة المنتج إلى عربة التسوق!'
+                                      : 'Product added to shopping cart!',
+                                );
+                              },
+                              icon: const Icon(Icons.add_shopping_cart),
+                              label: Text(
+                                '${context.l10n.addToCart} (${context.formatPrice(product.price * quantity)})',
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ],

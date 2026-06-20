@@ -610,7 +610,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String priceFormat(Object price) {
-    return '$price SAR';
+    return '$price EGP';
   }
 
   @override
@@ -666,8 +666,86 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pageNotFound => 'Page not found';
 
   @override
-  String get pageNotFoundDesc => 'The page you are looking for does not exist.';
+  String get maintenanceMessage => 'We are currently under maintenance. Please check back later.';
 
   @override
-  String get maintenanceMessage => 'We are currently under maintenance. Please check back later.';
+  String get contactPhone => 'Contact Phone';
+
+  @override
+  String get contactWhatsApp => 'Contact WhatsApp';
+
+  @override
+  String get contactInfo => 'Contact Information';
+
+  @override
+  String get settingsSaved => 'Settings saved successfully';
+
+  @override
+  String get cartTitle => 'Shopping Cart';
+
+  @override
+  String get addToCart => 'Add to Cart';
+
+  @override
+  String get removeFromCart => 'Remove from Cart';
+
+  @override
+  String get checkout => 'Checkout';
+
+  @override
+  String get cartEmpty => 'Your cart is empty';
+
+  @override
+  String get cartTotal => 'Total Amount';
+
+  @override
+  String get ordersTitle => 'Orders Management';
+
+  @override
+  String get orderStatus => 'Order Status';
+
+  @override
+  String get statusPending => 'Pending';
+
+  @override
+  String get statusConfirmed => 'Confirmed';
+
+  @override
+  String get statusPreparing => 'Preparing';
+
+  @override
+  String get statusOutForDelivery => 'Out For Delivery';
+
+  @override
+  String get statusDelivered => 'Delivered';
+
+  @override
+  String get statusCancelled => 'Cancelled';
+
+  @override
+  String get searchOrders => 'Search by Order ID or Email...';
+
+  @override
+  String get noOrders => 'No orders found';
+
+  @override
+  String get orderId => 'Order ID';
+
+  @override
+  String get customerEmail => 'Customer Email';
+
+  @override
+  String get orderDate => 'Order Date';
+
+  @override
+  String get items => 'Items';
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get statusUpdated => 'Order status updated successfully';
+
+  @override
+  String get cartSuccess => 'Order placed successfully!';
 }

@@ -101,6 +101,8 @@ void main() {
   group('createCategory', () {
     test('creates category successfully with empty id', () async {
       final newEntity = testEntity.copyWith(id: '');
+      when(() => mockFirebase.getCategories(limit: any(named: 'limit')))
+          .thenAnswer((_) async => []);
       when(() => mockFirebase.createCategory(any()))
           .thenAnswer((_) async => testDto);
 
@@ -110,6 +112,8 @@ void main() {
     });
 
     test('creates category with provided id', () async {
+      when(() => mockFirebase.getCategories(limit: any(named: 'limit')))
+          .thenAnswer((_) async => []);
       when(() => mockFirebase.createCategory(any()))
           .thenAnswer((_) async => testDto);
 

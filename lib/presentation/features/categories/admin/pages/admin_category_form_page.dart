@@ -29,6 +29,8 @@ class AdminCategoryFormPage extends ConsumerWidget {
               ref.read(categoryFormProvider(editId).notifier).setNameEn(value),
           onVisibilityChanged: (value) =>
               ref.read(categoryFormProvider(editId).notifier).setVisibility(value),
+          onActiveChanged: (value) =>
+              ref.read(categoryFormProvider(editId).notifier).setActive(value),
           onImageSelected: (url) =>
               ref.read(categoryFormProvider(editId).notifier).setImageUrl(url),
           onSubmit: () async {

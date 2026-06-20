@@ -429,7 +429,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get search => 'بحث';
 
   @override
-  String get searchProducts => 'ابحث عن منتج...';
+  String get searchProducts => 'البحث عن المنتجات...';
 
   @override
   String get searchResults => 'نتائج البحث';
@@ -610,7 +610,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String priceFormat(Object price) {
-    return '$price ر.س';
+    return '$price ج.م';
   }
 
   @override
@@ -682,8 +682,86 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pageNotFound => 'الصفحة غير موجودة';
 
   @override
-  String get pageNotFoundDesc => 'الصفحة التي تبحث عنها غير موجودة.';
+  String get maintenanceMessage => 'نحن حالياً تحت الصيانة. الرجاء العودة لاحقاً.';
 
   @override
-  String get maintenanceMessage => 'نحن حالياً تحت الصيانة. الرجاء العودة لاحقاً.';
+  String get contactPhone => 'رقم الهاتف للتواصل';
+
+  @override
+  String get contactWhatsApp => 'رقم الواتساب للتواصل';
+
+  @override
+  String get contactInfo => 'معلومات الاتصال';
+
+  @override
+  String get settingsSaved => 'تم حفظ الإعدادات بنجاح';
+
+  @override
+  String get cartTitle => 'عربة التسوق';
+
+  @override
+  String get addToCart => 'إضافة إلى العربة';
+
+  @override
+  String get removeFromCart => 'إزالة من العربة';
+
+  @override
+  String get checkout => 'إتمام الشراء';
+
+  @override
+  String get cartEmpty => 'عربة التسوق فارغة';
+
+  @override
+  String get cartTotal => 'المبلغ الإجمالي';
+
+  @override
+  String get ordersTitle => 'إدارة الطلبات';
+
+  @override
+  String get orderStatus => 'حالة الطلب';
+
+  @override
+  String get statusPending => 'قيد الانتظار';
+
+  @override
+  String get statusConfirmed => 'تم التأكيد';
+
+  @override
+  String get statusPreparing => 'قيد التجهيز';
+
+  @override
+  String get statusOutForDelivery => 'خارج للتوصيل';
+
+  @override
+  String get statusDelivered => 'تم التوصيل';
+
+  @override
+  String get statusCancelled => 'ملغي';
+
+  @override
+  String get searchOrders => 'البحث برقم الطلب أو البريد الإلكتروني...';
+
+  @override
+  String get noOrders => 'لا توجد طلبات';
+
+  @override
+  String get orderId => 'رقم الطلب';
+
+  @override
+  String get customerEmail => 'بريد العميل';
+
+  @override
+  String get orderDate => 'تاريخ الطلب';
+
+  @override
+  String get items => 'العناصر';
+
+  @override
+  String get quantity => 'الكمية';
+
+  @override
+  String get statusUpdated => 'تم تحديث حالة الطلب بنجاح';
+
+  @override
+  String get cartSuccess => 'تم تقديم الطلب بنجاح!';
 }

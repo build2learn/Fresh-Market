@@ -1,11 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fresh_market/data/providers/product_repository_provider.dart';
+import 'package:fresh_market/data/providers/notification_repository_provider.dart';
 import 'package:fresh_market/domain/usecases/product/create_product.usecase.dart';
 import 'package:fresh_market/domain/usecases/product/update_product.usecase.dart';
 import 'package:fresh_market/domain/usecases/product/delete_product.usecase.dart';
 import 'package:fresh_market/domain/usecases/product/get_products.usecase.dart';
 import 'package:fresh_market/domain/usecases/product/watch_products.usecase.dart';
 import 'package:fresh_market/domain/usecases/product/toggle_product.usecase.dart';
+import 'package:fresh_market/data/providers/audit_log_repository_provider.dart';
+import 'package:fresh_market/presentation/features/auth/providers/auth_providers.dart';
 import 'product_list_provider.dart';
 import 'product_form_provider.dart';
 
@@ -65,6 +68,11 @@ final productFormProvider = StateNotifierProvider.family.autoDispose<
   return ProductFormNotifier(
     createProduct: ref.watch(createProductUseCaseProvider),
     updateProduct: ref.watch(updateProductUseCaseProvider),
+    getProduct: ref.watch(getProductUseCaseProvider),
+    notificationRepository: ref.watch(notificationRepositoryProvider),
+    auditLogRepository: ref.watch(auditLogRepositoryProvider),
+    currentUser: ref.watch(currentUserProvider),
     editId: editId,
   );
 });
+

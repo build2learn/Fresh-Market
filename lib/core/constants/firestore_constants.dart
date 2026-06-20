@@ -9,6 +9,9 @@ abstract final class FirestoreConstants {
   static const String banners = 'banners';
   static const String notifications = 'notifications';
   static const String settings = 'settings';
+  static const String orders = 'orders';
+  static const String orderItems = 'order_items';
+  static const String addresses = 'addresses';
 
   static const String createdAt = 'createdAt';
   static const String updatedAt = 'updatedAt';

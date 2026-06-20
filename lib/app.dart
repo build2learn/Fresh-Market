@@ -10,6 +10,10 @@ import 'package:fresh_market/core/providers/locale_provider.dart';
 import 'package:fresh_market/core/services/bootstrap.dart';
 import 'package:fresh_market/core/theme/app_theme.dart';
 import 'package:fresh_market/presentation/routing/app_router.dart';
+import 'package:fresh_market/core/services/notification_service.dart';
+import 'package:fresh_market/core/constants/route_constants.dart';
+
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 class FreshMarketApp extends ConsumerStatefulWidget {
   const FreshMarketApp({super.key});
@@ -20,12 +24,59 @@ class FreshMarketApp extends ConsumerStatefulWidget {
 
 class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
   bool _initialized = false;
+  StreamSubscription? _notificationSubscription;
 
   @override
   void initState() {
     super.initState();
     debugPrint('[APP] FreshMarketApp.initState - starting locale initialization');
     _initLocaleWithTimeout();
+    _initNotificationListener();
+  }
+
+  void _initNotificationListener() {
+    _notificationSubscription = NotificationService.instance.onMessageReceived.listen((message) {
+      debugPrint('[FG NOTIFICATION] Notification received: ${message.messageId}');
+      final notification = message.notification;
+      if (notification != null) {
+        final currentLocale = ref.read(localeProvider);
+        final isArabic = currentLocale.languageCode == 'ar';
+        
+        final title = isArabic 
+            ? (message.data['titleAr'] ?? notification.title ?? '')
+            : (message.data['titleEn'] ?? notification.title ?? '');
+        final body = isArabic
+            ? (message.data['bodyAr'] ?? notification.body ?? '')
+            : (message.data['bodyEn'] ?? notification.body ?? '');
+
+        scaffoldMessengerKey.currentState?.showSnackBar(
+          SnackBar(
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 4),
+                Text(body, style: const TextStyle(color: Colors.white)),
+              ],
+            ),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.green.shade700,
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: isArabic ? 'عرض' : 'View',
+              textColor: Colors.white,
+              onPressed: () {
+                ref.read(goRouterProvider).push(RouteConstants.notifications);
+              },
+            ),
+          ),
+        );
+      }
+    });
   }
 
   Future<void> _initLocaleWithTimeout() async {
@@ -42,6 +93,12 @@ class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
       setState(() => _initialized = true);
       debugPrint('[APP] _initialized = true');
     }
+  }
+
+  @override
+  void dispose() {
+    _notificationSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -103,6 +160,7 @@ class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
     debugPrint('[APP] Build: app ready - routing to splash page');
     return MaterialApp.router(
       title: 'Fresh Market',
+      scaffoldMessengerKey: scaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
 
       locale: locale,

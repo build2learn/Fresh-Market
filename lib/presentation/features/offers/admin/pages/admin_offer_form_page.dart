@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fresh_market/core/extensions/context_extensions.dart';
 import 'package:fresh_market/presentation/features/products/providers/product_providers.dart';
+import 'package:fresh_market/presentation/features/admin/providers/lookup_providers.dart';
 import '../../providers/offer_providers.dart';
 import '../widgets/offer_form_widget.dart';
 
@@ -17,9 +18,18 @@ class AdminOfferFormPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formState = ref.watch(offerFormProvider(editId));
     final isEdit = editId != null;
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     final productsState = ref.watch(productListProvider);
     final products = productsState.products;
+
+    final offerTypesAsync = ref.watch(lookupListProvider('OfferType'));
+    final offerTypeItems = offerTypesAsync.valueOrNull?.where((l) => l.isActive).map((type) {
+      return DropdownMenuItem<String>(
+        value: type.code,
+        child: Text(isRtl ? type.nameAr : type.nameEn),
+      );
+    }).toList() ?? [];
 
     final pickedImagePath = ref.watch(_pickedImagePathProvider);
 
@@ -31,6 +41,7 @@ class AdminOfferFormPage extends ConsumerWidget {
         state: formState,
         products: products,
         pickedImagePath: pickedImagePath,
+        offerTypeItems: offerTypeItems,
         onTitleArChanged: (v) => ref.read(offerFormProvider(editId).notifier).setTitleAr(v),
         onTitleEnChanged: (v) => ref.read(offerFormProvider(editId).notifier).setTitleEn(v),
         onDescriptionArChanged: (v) => ref.read(offerFormProvider(editId).notifier).setDescriptionAr(v),
@@ -38,6 +49,7 @@ class AdminOfferFormPage extends ConsumerWidget {
         onActiveChanged: (v) => ref.read(offerFormProvider(editId).notifier).setActive(v),
         onStartDateChanged: (v) => ref.read(offerFormProvider(editId).notifier).setStartDate(v),
         onEndDateChanged: (v) => ref.read(offerFormProvider(editId).notifier).setEndDate(v),
+        onOfferTypeChanged: (v) => ref.read(offerFormProvider(editId).notifier).setOfferType(v),
         onProductToggled: (productId) {
           ref.read(offerFormProvider(editId).notifier).toggleProductId(productId);
         },

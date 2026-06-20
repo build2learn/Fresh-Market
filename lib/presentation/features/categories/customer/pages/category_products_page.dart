@@ -36,6 +36,12 @@ class CategoryProductsPage extends ConsumerWidget {
               ? (context.isRtl ? category.nameAr : category.nameEn)
               : context.l10n.products,
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => context.push(RouteConstants.search),
+          ),
+        ],
       ),
       body: productsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -137,7 +143,7 @@ class _ProductGridItem extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      context.l10n.priceFormat(product.price.toStringAsFixed(2)),
+                      context.formatPrice(product.price),
                       style: context.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: context.colorScheme.primary,

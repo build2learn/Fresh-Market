@@ -7,8 +7,8 @@ abstract interface class CategoryRepository {
   Future<Result<List<CategoryEntity>>> getVisibleCategories();
   Future<Result<List<CategoryEntity>>> getDeletedCategories();
   Stream<List<CategoryEntity>> watchCategories();
-  Future<Result<CategoryEntity>> createCategory(CategoryEntity category);
-  Future<Result<CategoryEntity>> updateCategory(CategoryEntity category);
+  Future<Result<CategoryEntity>> createCategory(CategoryEntity category, {String? imagePath});
+  Future<Result<CategoryEntity>> updateCategory(CategoryEntity category, {String? imagePath});
   Future<Result<void>> toggleVisibility(String categoryId, bool isVisible);
   Future<Result<void>> reorderCategories(List<String> categoryIds);
   Future<Result<void>> deleteCategory(String categoryId);

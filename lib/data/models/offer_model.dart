@@ -14,6 +14,7 @@ class OfferModel extends OfferDto {
     required super.endDate,
     required super.createdAt,
     required super.updatedAt,
+    super.offerType = 'PercentageDiscount',
   });
 
   factory OfferModel.fromDto(OfferDto dto) {
@@ -29,6 +30,7 @@ class OfferModel extends OfferDto {
       endDate: dto.endDate,
       createdAt: dto.createdAt,
       updatedAt: dto.updatedAt,
+      offerType: dto.offerType,
     );
   }
 
@@ -45,6 +47,7 @@ class OfferModel extends OfferDto {
       endDate: entity.endDate,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      offerType: entity.offerType,
     );
   }
 
@@ -61,6 +64,7 @@ class OfferModel extends OfferDto {
       endDate: endDate,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      offerType: offerType,
     );
   }
 }

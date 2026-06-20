@@ -13,6 +13,9 @@ class UserEntity extends Equatable {
   final DateTime? lastLoginAt;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final int loyaltyPoints;
+  final int lifetimePoints;
+  final String membershipLevel;
 
   const UserEntity({
     required this.id,
@@ -26,6 +29,9 @@ class UserEntity extends Equatable {
     this.lastLoginAt,
     required this.createdAt,
     required this.updatedAt,
+    this.loyaltyPoints = 0,
+    this.lifetimePoints = 0,
+    this.membershipLevel = 'Bronze',
   });
 
   bool get isAdmin => role.isAdmin;
@@ -44,6 +50,9 @@ class UserEntity extends Equatable {
     lastLoginAt,
     createdAt,
     updatedAt,
+    loyaltyPoints,
+    lifetimePoints,
+    membershipLevel,
   ];
 
   UserEntity copyWith({
@@ -58,6 +67,9 @@ class UserEntity extends Equatable {
     DateTime? lastLoginAt,
     DateTime? createdAt,
     DateTime? updatedAt,
+    int? loyaltyPoints,
+    int? lifetimePoints,
+    String? membershipLevel,
   }) {
     return UserEntity(
       id: id ?? this.id,
@@ -71,6 +83,9 @@ class UserEntity extends Equatable {
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      loyaltyPoints: loyaltyPoints ?? this.loyaltyPoints,
+      lifetimePoints: lifetimePoints ?? this.lifetimePoints,
+      membershipLevel: membershipLevel ?? this.membershipLevel,
     );
   }
 }

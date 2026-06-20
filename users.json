@@ -1,0 +1,50 @@
+[
+  {
+    "id": "admin_user",
+    "displayName": "System Administrator",
+    "email": "admin@freshmarket.com",
+    "password": "Password123",
+    "role": "admin",
+    "isActive": true
+  },
+  {
+    "id": "manager_user",
+    "displayName": "Store Manager",
+    "email": "manager@freshmarket.com",
+    "password": "Password123",
+    "role": "manager",
+    "isActive": true
+  },
+  {
+    "id": "warehouse_user",
+    "displayName": "Warehouse Supervisor",
+    "email": "warehouse@freshmarket.com",
+    "password": "Password123",
+    "role": "warehouse",
+    "isActive": true
+  },
+  {
+    "id": "delivery_user",
+    "displayName": "Delivery Agent",
+    "email": "delivery@freshmarket.com",
+    "password": "Password123",
+    "role": "delivery",
+    "isActive": true
+  },
+  {
+    "id": "cs_user",
+    "displayName": "Customer Service Rep",
+    "email": "cs@freshmarket.com",
+    "password": "Password123",
+    "role": "customerService",
+    "isActive": true
+  },
+  {
+    "id": "customer_user",
+    "displayName": "Loyal Customer",
+    "email": "customer@freshmarket.com",
+    "password": "Password123",
+    "role": "customer",
+    "isActive": true
+  }
+]

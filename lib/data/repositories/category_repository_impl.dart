@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:math';
 import '../../core/errors/app_exception.dart';
 import '../../core/utils/result.dart';
 import '../../domain/entities/category.entity.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../datasources/firebase/category_firebase_datasource.dart';
 import '../datasources/local/category_local_datasource.dart';
+import '../dto/category.dto.dart';
 import '../models/category_model.dart';
 
 class CategoryRepositoryImpl implements CategoryRepository {
@@ -82,11 +82,23 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  Future<Result<CategoryEntity>> createCategory(CategoryEntity category) async {
+  Future<Result<CategoryEntity>> createCategory(CategoryEntity category, {String? imagePath}) async {
     try {
-      final id = category.id.isEmpty ? _generateId() : category.id;
-      final dto = CategoryModel.fromEntity(category.copyWith(id: id));
-      final created = await _firebaseDataSource.createCategory(dto);
+      final existing = await _firebaseDataSource.getCategories(limit: 1000);
+      final id = category.id.isEmpty ? _generateId(existing) : category.id;
+      
+      // Determine the sort order: if sortOrder is 0 and there are categories, set it to max + 1
+      int sortOrder = category.sortOrder;
+      if (sortOrder == 0 && existing.isNotEmpty) {
+        int maxSort = 0;
+        for (final cat in existing) {
+          if (cat.sortOrder > maxSort) maxSort = cat.sortOrder;
+        }
+        sortOrder = maxSort + 1;
+      }
+
+      final dto = CategoryModel.fromEntity(category.copyWith(id: id, sortOrder: sortOrder));
+      final created = await _firebaseDataSource.createCategory(dto, imagePath: imagePath);
       return Success(CategoryModel.fromDto(created).toEntity());
     } on AppException catch (e) {
       return Failure(e);
@@ -96,10 +108,10 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  Future<Result<CategoryEntity>> updateCategory(CategoryEntity category) async {
+  Future<Result<CategoryEntity>> updateCategory(CategoryEntity category, {String? imagePath}) async {
     try {
       final dto = CategoryModel.fromEntity(category);
-      final updated = await _firebaseDataSource.updateCategory(dto);
+      final updated = await _firebaseDataSource.updateCategory(dto, imagePath: imagePath);
       return Success(CategoryModel.fromDto(updated).toEntity());
     } on AppException catch (e) {
       return Failure(e);
@@ -156,9 +168,14 @@ class CategoryRepositoryImpl implements CategoryRepository {
     }
   }
 
-  String _generateId() {
-    final random = Random();
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    return List.generate(20, (_) => chars[random.nextInt(chars.length)]).join();
+  String _generateId(List<CategoryDto> existing) {
+    int maxId = 0;
+    for (final dto in existing) {
+      final idInt = int.tryParse(dto.id);
+      if (idInt != null && idInt > maxId) {
+        maxId = idInt;
+      }
+    }
+    return (maxId + 1).toString();
   }
 }

@@ -16,6 +16,18 @@ class ProductDto {
   final bool isAvailable;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String productType;
+  final String status;
+  final int currentStock;
+  final int reservedStock;
+  final int availableStock;
+  final int minimumStock;
+  final int reorderLevel;
+
+  // Legacy compatibility getters
+  int get stockQuantity => availableStock;
+  int get minStock => minimumStock;
+  int get alertQuantity => reorderLevel;
 
   const ProductDto({
     required this.id,
@@ -33,6 +45,13 @@ class ProductDto {
     required this.isAvailable,
     required this.createdAt,
     required this.updatedAt,
+    this.productType = 'Fresh',
+    this.status = 'Available',
+    this.currentStock = 50,
+    this.reservedStock = 0,
+    this.availableStock = 50,
+    this.minimumStock = 5,
+    this.reorderLevel = 10,
   });
 
   static DateTime _toDateTime(dynamic value) {
@@ -45,6 +64,12 @@ class ProductDto {
   }
 
   factory ProductDto.fromMap(Map<String, dynamic> map, String documentId) {
+    final curStock = map['currentStock'] as int? ?? map['stockQuantity'] as int? ?? 50;
+    final resStock = map['reservedStock'] as int? ?? 0;
+    final avStock = map['availableStock'] as int? ?? map['stockQuantity'] as int? ?? (curStock - resStock);
+    final minStock = map['minimumStock'] as int? ?? map['minStock'] as int? ?? 5;
+    final alertQty = map['reorderLevel'] as int? ?? map['alertQuantity'] as int? ?? 10;
+
     return ProductDto(
       id: documentId,
       nameAr: map['nameAr'] as String? ?? '',
@@ -61,6 +86,13 @@ class ProductDto {
       isAvailable: map[FirestoreConstants.isAvailable] as bool? ?? true,
       createdAt: _toDateTime(map[FirestoreConstants.createdAt]),
       updatedAt: _toDateTime(map[FirestoreConstants.updatedAt]),
+      productType: map['productType'] as String? ?? 'Fresh',
+      status: map['status'] as String? ?? 'Available',
+      currentStock: curStock,
+      reservedStock: resStock,
+      availableStock: avStock,
+      minimumStock: minStock,
+      reorderLevel: alertQty,
     );
   }
 
@@ -79,8 +111,19 @@ class ProductDto {
       'categoryId': categoryId,
       FirestoreConstants.isFeatured: isFeatured,
       FirestoreConstants.isAvailable: isAvailable,
-      FirestoreConstants.createdAt: createdAt,
-      FirestoreConstants.updatedAt: updatedAt,
+      FirestoreConstants.createdAt: createdAt.toIso8601String(),
+      FirestoreConstants.updatedAt: updatedAt.toIso8601String(),
+      'productType': productType,
+      'status': status,
+      'currentStock': currentStock,
+      'reservedStock': reservedStock,
+      'availableStock': availableStock,
+      'minimumStock': minimumStock,
+      'reorderLevel': reorderLevel,
+      // Legacy compatibility
+      'stockQuantity': availableStock,
+      'minStock': minimumStock,
+      'alertQuantity': reorderLevel,
     };
   }
 
@@ -100,6 +143,13 @@ class ProductDto {
     bool? isAvailable,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? productType,
+    String? status,
+    int? currentStock,
+    int? reservedStock,
+    int? availableStock,
+    int? minimumStock,
+    int? reorderLevel,
   }) {
     return ProductDto(
       id: id ?? this.id,
@@ -117,6 +167,13 @@ class ProductDto {
       isAvailable: isAvailable ?? this.isAvailable,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      productType: productType ?? this.productType,
+      status: status ?? this.status,
+      currentStock: currentStock ?? this.currentStock,
+      reservedStock: reservedStock ?? this.reservedStock,
+      availableStock: availableStock ?? this.availableStock,
+      minimumStock: minimumStock ?? this.minimumStock,
+      reorderLevel: reorderLevel ?? this.reorderLevel,
     );
   }
 }

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fresh_market/core/extensions/context_extensions.dart';
-import 'package:fresh_market/presentation/features/categories/providers/category_providers.dart';
-import 'package:fresh_market/presentation/features/weight_units/providers/weight_unit_providers.dart';
+import 'package:fresh_market/presentation/features/admin/providers/lookup_providers.dart';
 import '../../providers/product_providers.dart';
 import '../widgets/product_form_widget.dart';
 
@@ -20,21 +19,38 @@ class AdminProductFormPage extends ConsumerWidget {
     final isEdit = editId != null;
     final isRtl = Directionality.of(context) == TextDirection.rtl;
 
-    final categoriesState = ref.watch(categoryListProvider);
-    final categoryItems = categoriesState.categories.map((cat) {
+    final categoriesAsync = ref.watch(lookupListProvider('Category'));
+    final weightUnitsAsync = ref.watch(lookupListProvider('WeightUnit'));
+    final productTypesAsync = ref.watch(lookupListProvider('ProductType'));
+    final productStatusesAsync = ref.watch(lookupListProvider('ProductStatus'));
+
+    final categoryItems = categoriesAsync.valueOrNull?.where((l) => l.isActive).map((cat) {
       return DropdownMenuItem<String>(
-        value: cat.id,
+        value: cat.code,
         child: Text(isRtl ? cat.nameAr : cat.nameEn),
       );
-    }).toList();
+    }).toList() ?? [];
 
-    final weightUnitsState = ref.watch(weightUnitListProvider);
-    final weightUnitItems = weightUnitsState.weightUnits.map((unit) {
+    final weightUnitItems = weightUnitsAsync.valueOrNull?.where((l) => l.isActive).map((unit) {
       return DropdownMenuItem<String>(
-        value: unit.id,
+        value: unit.code,
         child: Text(isRtl ? unit.nameAr : unit.nameEn),
       );
-    }).toList();
+    }).toList() ?? [];
+
+    final productTypeItems = productTypesAsync.valueOrNull?.where((l) => l.isActive).map((type) {
+      return DropdownMenuItem<String>(
+        value: type.code,
+        child: Text(isRtl ? type.nameAr : type.nameEn),
+      );
+    }).toList() ?? [];
+
+    final productStatusItems = productStatusesAsync.valueOrNull?.where((l) => l.isActive).map((status) {
+      return DropdownMenuItem<String>(
+        value: status.code,
+        child: Text(isRtl ? status.nameAr : status.nameEn),
+      );
+    }).toList() ?? [];
 
     final pickedImagePath = ref.watch(_pickedImagePathProvider);
 
@@ -48,6 +64,8 @@ class AdminProductFormPage extends ConsumerWidget {
           state: formState,
           categoryItems: categoryItems,
           weightUnitItems: weightUnitItems,
+          productTypeItems: productTypeItems,
+          productStatusItems: productStatusItems,
           pickedImagePath: pickedImagePath,
           onNameArChanged: (v) => ref.read(productFormProvider(editId).notifier).setNameAr(v),
           onNameEnChanged: (v) => ref.read(productFormProvider(editId).notifier).setNameEn(v),
@@ -59,6 +77,11 @@ class AdminProductFormPage extends ConsumerWidget {
           onCategoryIdChanged: (v) => ref.read(productFormProvider(editId).notifier).setCategoryId(v),
           onFeaturedChanged: (v) => ref.read(productFormProvider(editId).notifier).setFeatured(v),
           onAvailableChanged: (v) => ref.read(productFormProvider(editId).notifier).setAvailable(v),
+          onProductTypeChanged: (v) => ref.read(productFormProvider(editId).notifier).setProductType(v),
+          onProductStatusChanged: (v) => ref.read(productFormProvider(editId).notifier).setStatus(v),
+          onStockQuantityChanged: (v) => ref.read(productFormProvider(editId).notifier).setStockQuantity(v),
+          onMinStockChanged: (v) => ref.read(productFormProvider(editId).notifier).setMinStock(v),
+          onAlertQuantityChanged: (v) => ref.read(productFormProvider(editId).notifier).setAlertQuantity(v),
           onImageSelected: (filePath) {
             ref.read(_pickedImagePathProvider.notifier).state = filePath;
           },
