@@ -57,7 +57,11 @@ class ProductEntity extends Equatable {
     int? minStock,
     int? alertQuantity,
   }) : this.currentStock = stockQuantity ?? currentStock,
-       this.availableStock = availableStock ?? stockQuantity ?? ((stockQuantity ?? currentStock) - reservedStock),
+       this.availableStock = (availableStock ?? stockQuantity ?? ((stockQuantity ?? currentStock) - reservedStock)) < 0
+           ? 0
+           : (availableStock ?? stockQuantity ?? ((stockQuantity ?? currentStock) - reservedStock)) > (stockQuantity ?? currentStock)
+               ? (stockQuantity ?? currentStock)
+               : (availableStock ?? stockQuantity ?? ((stockQuantity ?? currentStock) - reservedStock)),
        this.minimumStock = minStock ?? minimumStock,
        this.reorderLevel = alertQuantity ?? reorderLevel;
 

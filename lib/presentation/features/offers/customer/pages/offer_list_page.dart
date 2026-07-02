@@ -26,7 +26,9 @@ class _OfferListPageState extends ConsumerState<OfferListPage> {
 
   @override
   void dispose() {
-    ref.read(offerListProvider.notifier).stopRealtimeSync();
+    try {
+      ref.read(offerListProvider.notifier).stopRealtimeSync();
+    } catch (_) {}
     super.dispose();
   }
 

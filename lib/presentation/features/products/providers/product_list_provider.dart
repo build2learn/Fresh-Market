@@ -61,8 +61,14 @@ class ProductListNotifier extends StateNotifier<ProductListState> {
   }
 
   Future<void> _init() async {
+    await Future.delayed(Duration.zero);
+    if (!mounted || _realtimeSubscription != null) return;
+
     state = state.copyWith(requestState: RequestState.loading);
     final result = await _getProducts();
+
+    if (!mounted || _realtimeSubscription != null) return;
+
     if (result is Success<List<ProductEntity>>) {
       state = state.copyWith(
         products: result.data,
@@ -77,11 +83,21 @@ class ProductListNotifier extends StateNotifier<ProductListState> {
   }
 
   void startRealtimeSync() {
+    if (_realtimeSubscription != null) return;
     _realtimeSubscription = _watchProducts().listen((products) {
-      state = state.copyWith(
-        products: products,
-        requestState: RequestState.success,
-      );
+      if (mounted) {
+        state = state.copyWith(
+          products: products,
+          requestState: RequestState.success,
+        );
+      }
+    }, onError: (error) {
+      if (mounted) {
+        state = state.copyWith(
+          requestState: RequestState.failure,
+          errorMessage: error.toString(),
+        );
+      }
     });
   }
 

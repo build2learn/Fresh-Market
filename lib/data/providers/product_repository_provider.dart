@@ -9,6 +9,7 @@ final productFirebaseDataSourceProvider = Provider<ProductFirebaseDataSource>((r
   return ProductFirebaseDataSourceImpl(
     firestore: ref.watch(firebaseFirestoreProvider),
     storage: ref.watch(firebaseStorageProvider),
+    auth: ref.watch(firebaseAuthProvider),
   );
 });
 

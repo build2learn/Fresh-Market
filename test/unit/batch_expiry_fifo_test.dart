@@ -9,6 +9,18 @@ import 'package:fresh_market/domain/entities/product.entity.dart';
 import 'package:fresh_market/core/services/mock_repositories.dart';
 import 'package:fresh_market/data/models/order_model.dart';
 
+String _testEncode(dynamic value) {
+  return jsonEncode(value, toEncodable: (item) {
+    if (item is DateTime) {
+      return item.toIso8601String();
+    }
+    if (item.runtimeType.toString().contains('Timestamp')) {
+      return (item as dynamic).toDate().toIso8601String();
+    }
+    return item;
+  });
+}
+
 void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
@@ -308,7 +320,7 @@ void main() {
 
       // Seed order directly
       final orderDto = OrderModel.fromEntity(order);
-      await prefs.setStringList('mock_orders', [jsonEncode(orderDto.toMap()..['id'] = orderDto.id)]);
+      await prefs.setStringList('mock_orders', [_testEncode(orderDto.toMap()..['id'] = orderDto.id)]);
 
       // Cancel the order
       final cancelRes = await orderRepo.updateOrderStatus('ord_test_fifo', 'Cancelled');
@@ -421,7 +433,7 @@ void main() {
 
       // Seed order directly
       final orderDto = OrderModel.fromEntity(order);
-      await prefs.setStringList('mock_orders', [jsonEncode(orderDto.toMap()..['id'] = orderDto.id)]);
+      await prefs.setStringList('mock_orders', [_testEncode(orderDto.toMap()..['id'] = orderDto.id)]);
 
       // Deliver the order
       final deliverRes = await orderRepo.updateOrderStatus('ord_test_fifo', 'Delivered');

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/constants/firestore_constants.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/utils/result.dart';
@@ -15,8 +16,15 @@ import '../models/stock_transfer_model.dart';
 
 class WarehouseRepositoryImpl implements WarehouseRepository {
   final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
 
-  WarehouseRepositoryImpl({required FirebaseFirestore firestore}) : _firestore = firestore;
+  WarehouseRepositoryImpl({
+    required FirebaseFirestore firestore,
+    FirebaseAuth? auth,
+  })  : _firestore = firestore,
+        _auth = auth ?? FirebaseAuth.instance;
+
+  String get _currentUserId => _auth.currentUser?.uid ?? 'system';
 
   CollectionReference get _warehousesCol => _firestore.collection('warehouses');
   CollectionReference get _inventoriesCol => _firestore.collection('warehouse_inventories');
@@ -57,9 +65,7 @@ class WarehouseRepositoryImpl implements WarehouseRepository {
           ..[FirestoreConstants.createdAt] = FieldValue.serverTimestamp()
           ..[FirestoreConstants.updatedAt] = FieldValue.serverTimestamp(),
       );
-      final doc = await docRef.get();
-      final dto = WarehouseDto.fromMap(doc.data() as Map<String, dynamic>, doc.id);
-      return Success(WarehouseModel.fromDto(dto).toEntity());
+      return Success(warehouse.copyWith(id: docRef.id));
     } catch (e) {
       return Failure(FirestoreException(message: e.toString()));
     }
@@ -81,8 +87,33 @@ class WarehouseRepositoryImpl implements WarehouseRepository {
   @override
   Future<Result<void>> deleteWarehouse(String warehouseId) async {
     try {
-      await _warehousesCol.doc(warehouseId).delete();
+      await _firestore.runTransaction((transaction) async {
+        // Check for inventory records with stock > 0
+        final inventorySnap = await _inventoriesCol
+            .where('warehouseId', isEqualTo: warehouseId)
+            .get();
+
+        for (final doc in inventorySnap.docs) {
+          final data = doc.data() as Map<String, dynamic>;
+          final qty = data['quantity'] as int? ?? 0;
+          if (qty > 0) {
+            throw FirestoreException(
+              message: 'Cannot delete warehouse with active inventory (product has $qty units)',
+            );
+          }
+        }
+
+        // Clean up zero-quantity inventory docs
+        for (final doc in inventorySnap.docs) {
+          transaction.delete(doc.reference);
+        }
+
+        // Delete the warehouse itself
+        transaction.delete(_warehousesCol.doc(warehouseId));
+      });
       return const Success(null);
+    } on FirestoreException catch (e) {
+      return Failure(e);
     } catch (e) {
       return Failure(FirestoreException(message: e.toString()));
     }
@@ -146,29 +177,92 @@ class WarehouseRepositoryImpl implements WarehouseRepository {
     String productId,
     int quantity,
   ) async {
+    if (quantity < 0) {
+      return Failure(FirestoreException(message: 'Inventory quantity cannot be negative'));
+    }
     try {
       final id = '${warehouseId}_$productId';
       final docRef = _inventoriesCol.doc(id);
-      final doc = await docRef.get();
+      final productRef = _firestore.collection(FirestoreConstants.products).doc(productId);
 
-      if (doc.exists) {
-        await docRef.update({
-          'quantity': quantity,
-          FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
-        });
-      } else {
-        await docRef.set({
-          'warehouseId': warehouseId,
-          'productId': productId,
-          'quantity': quantity,
-          FirestoreConstants.createdAt: FieldValue.serverTimestamp(),
-          FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
-        });
-      }
+      final result = await _firestore.runTransaction((transaction) async {
+        final invDoc = await transaction.get(docRef);
+        final productDoc = await transaction.get(productRef);
 
-      final updatedDoc = await docRef.get();
-      final dto = WarehouseInventoryDto.fromMap(updatedDoc.data() as Map<String, dynamic>, updatedDoc.id);
-      return Success(WarehouseInventoryModel.fromDto(dto).toEntity());
+        final oldQuantity = invDoc.exists
+            ? ((invDoc.data() as Map<String, dynamic>)['quantity'] as int? ?? 0)
+            : 0;
+        final delta = quantity - oldQuantity;
+
+        // Validate product stock won't go negative
+        if (productDoc.exists && delta < 0) {
+          final pData = productDoc.data() as Map<String, dynamic>;
+          final avStock = pData['availableStock'] as int? ?? pData['stockQuantity'] as int? ?? 0;
+          if (avStock + delta < 0) {
+            throw FirestoreException(
+              message: 'Cannot reduce warehouse stock: would cause negative available stock',
+            );
+          }
+        }
+
+        // Update warehouse inventory
+        if (invDoc.exists) {
+          transaction.update(docRef, {
+            'quantity': quantity,
+            FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
+          });
+        } else {
+          transaction.set(docRef, {
+            'warehouseId': warehouseId,
+            'productId': productId,
+            'quantity': quantity,
+            FirestoreConstants.createdAt: FieldValue.serverTimestamp(),
+            FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
+          });
+        }
+
+        // Sync global product stock if product exists and delta != 0
+        if (productDoc.exists && delta != 0) {
+          transaction.update(productRef, {
+            'currentStock': FieldValue.increment(delta),
+            'availableStock': FieldValue.increment(delta),
+            'stockQuantity': FieldValue.increment(delta), // legacy sync
+            FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
+          });
+        }
+
+        // Audit: Log stock_history for warehouse inventory change
+        if (delta != 0) {
+          final pData = productDoc.exists ? productDoc.data() as Map<String, dynamic> : <String, dynamic>{};
+          final historyRef = _firestore.collection('stock_history').doc();
+          transaction.set(historyRef, {
+            'id': historyRef.id,
+            'productId': productId,
+            'productNameAr': pData['nameAr'] as String? ?? '',
+            'productNameEn': pData['nameEn'] as String? ?? '',
+            'warehouseId': warehouseId,
+            'type': 'warehouse_adjustment',
+            'quantityChanged': delta,
+            'previousStock': oldQuantity,
+            'newStock': quantity,
+            'reasonAr': 'تعديل مخزون المستودع',
+            'reasonEn': 'Warehouse inventory adjustment',
+            'createdAt': FieldValue.serverTimestamp(),
+            'createdBy': _currentUserId,
+          });
+        }
+
+        return WarehouseInventoryEntity(
+          id: id,
+          warehouseId: warehouseId,
+          productId: productId,
+          quantity: quantity,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+      });
+
+      return Success(result);
     } catch (e) {
       return Failure(FirestoreException(message: e.toString()));
     }
@@ -209,8 +303,13 @@ class WarehouseRepositoryImpl implements WarehouseRepository {
     required int quantity,
     String? notes,
   }) async {
+    if (quantity <= 0) {
+      return Failure(FirestoreException(message: 'Transfer quantity must be greater than zero'));
+    }
+    if (fromWarehouseId == toWarehouseId) {
+      return Failure(FirestoreException(message: 'Source and destination warehouses must be different'));
+    }
     try {
-      // Implement Firestore transactions for safety
       final result = await _firestore.runTransaction((transaction) async {
         final fromId = '${fromWarehouseId}_$productId';
         final toId = '${toWarehouseId}_$productId';
@@ -222,7 +321,7 @@ class WarehouseRepositoryImpl implements WarehouseRepository {
         final currentFromQty = fromDoc.exists ? (fromDoc.data() as Map<String, dynamic>)['quantity'] as int? ?? 0 : 0;
 
         if (currentFromQty < quantity) {
-          throw Exception('Insufficient stock in source warehouse');
+          throw Exception('Insufficient stock in source warehouse (available: $currentFromQty, requested: $quantity)');
         }
 
         final toDoc = await transaction.get(toDocRef);
@@ -248,7 +347,7 @@ class WarehouseRepositoryImpl implements WarehouseRepository {
           'toWarehouseId': toWarehouseId,
           'productId': productId,
           'quantity': quantity,
-          'transferDate': DateTime.now().toIso8601String(),
+          'transferDate': FieldValue.serverTimestamp(),
           'notes': notes,
           'status': 'Completed',
           FirestoreConstants.createdAt: FieldValue.serverTimestamp(),
@@ -256,6 +355,40 @@ class WarehouseRepositoryImpl implements WarehouseRepository {
         };
 
         transaction.set(transferDocRef, transferMap);
+
+        // Log stock_history for source warehouse (outbound)
+        final historyOutRef = _firestore.collection('stock_history').doc();
+        transaction.set(historyOutRef, {
+          'id': historyOutRef.id,
+          'productId': productId,
+          'warehouseId': fromWarehouseId,
+          'transferId': transferDocRef.id,
+          'type': 'transfer_out',
+          'quantityChanged': -quantity,
+          'previousStock': currentFromQty,
+          'newStock': currentFromQty - quantity,
+          'reasonEn': 'Transferred out to warehouse $toWarehouseId',
+          'reasonAr': 'تم النقل إلى مستودع $toWarehouseId',
+          'createdAt': FieldValue.serverTimestamp(),
+          'createdBy': _currentUserId,
+        });
+
+        // Log stock_history for destination warehouse (inbound)
+        final historyInRef = _firestore.collection('stock_history').doc();
+        transaction.set(historyInRef, {
+          'id': historyInRef.id,
+          'productId': productId,
+          'warehouseId': toWarehouseId,
+          'transferId': transferDocRef.id,
+          'type': 'transfer_in',
+          'quantityChanged': quantity,
+          'previousStock': currentToQty,
+          'newStock': currentToQty + quantity,
+          'reasonEn': 'Received transfer from warehouse $fromWarehouseId',
+          'reasonAr': 'تم الاستلام من مستودع $fromWarehouseId',
+          'createdAt': FieldValue.serverTimestamp(),
+          'createdBy': _currentUserId,
+        });
 
         return StockTransferDto(
           id: transferDocRef.id,

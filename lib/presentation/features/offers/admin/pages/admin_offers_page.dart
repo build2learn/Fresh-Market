@@ -26,7 +26,9 @@ class _AdminOffersPageState extends ConsumerState<AdminOffersPage> {
 
   @override
   void dispose() {
-    ref.read(offerListProvider.notifier).stopRealtimeSync();
+    try {
+      ref.read(offerListProvider.notifier).stopRealtimeSync();
+    } catch (_) {}
     super.dispose();
   }
 

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants/firestore_constants.dart';
 import 'address.dto.dart';
 
@@ -136,8 +137,8 @@ class OrderDto {
       'userId': userId,
       'userEmail': userEmail,
       'totalAmount': totalAmount,
-      FirestoreConstants.createdAt: createdAt.toIso8601String(),
-      FirestoreConstants.updatedAt: updatedAt.toIso8601String(),
+      FirestoreConstants.createdAt: Timestamp.fromDate(createdAt),
+      FirestoreConstants.updatedAt: Timestamp.fromDate(updatedAt),
       'items': items.map((e) => e.toMap()).toList(),
       'shippingAddress': shippingAddress != null
           ? (shippingAddress!.toMap()..['id'] = shippingAddress!.id)

@@ -63,7 +63,7 @@ final productListProvider =
   );
 });
 
-final productFormProvider = StateNotifierProvider.family.autoDispose<
+final productFormProvider = StateNotifierProvider.family<
     ProductFormNotifier, ProductFormState, String?>((ref, editId) {
   return ProductFormNotifier(
     createProduct: ref.watch(createProductUseCaseProvider),
@@ -75,4 +75,3 @@ final productFormProvider = StateNotifierProvider.family.autoDispose<
     editId: editId,
   );
 });
-

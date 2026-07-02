@@ -11,15 +11,26 @@ import 'package:intl/intl.dart';
 final _adminOrderStatusTabProvider = StateProvider<String>((ref) => 'All');
 final _adminOrderSearchQueryProvider = StateProvider<String>((ref) => '');
 
-final _adminOrdersStreamProvider = StreamProvider.autoDispose<List<OrderEntity>>((ref) {
+final _adminOrdersBaseStreamProvider = StreamProvider.autoDispose<List<OrderEntity>>((ref) {
   final status = ref.watch(_adminOrderStatusTabProvider);
-  final searchQuery = ref.watch(_adminOrderSearchQueryProvider);
   final repo = ref.watch(orderRepositoryProvider);
-  
-  return repo.watchOrders(
-    status: status == 'All' ? null : status,
-    searchQuery: searchQuery.isEmpty ? null : searchQuery,
-  );
+  return repo.watchOrders(status: status == 'All' ? null : status);
+});
+
+final _adminOrdersStreamProvider = Provider.autoDispose<AsyncValue<List<OrderEntity>>>((ref) {
+  final baseState = ref.watch(_adminOrdersBaseStreamProvider);
+  final searchQuery = ref.watch(_adminOrderSearchQueryProvider).trim().toLowerCase();
+
+  return baseState.whenData((list) {
+    if (searchQuery.isEmpty) return list;
+    return list.where((o) =>
+        o.id.toLowerCase().contains(searchQuery) ||
+        o.orderNumber.toLowerCase().contains(searchQuery) ||
+        o.customerName.toLowerCase().contains(searchQuery) ||
+        o.phone.toLowerCase().contains(searchQuery) ||
+        o.address.toLowerCase().contains(searchQuery) ||
+        o.userEmail.toLowerCase().contains(searchQuery)).toList();
+  });
 });
 
 class AdminOrdersPage extends ConsumerStatefulWidget {

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants/firestore_constants.dart';
 
 class ProductDto {
@@ -56,6 +57,10 @@ class ProductDto {
 
   static DateTime _toDateTime(dynamic value) {
     if (value is DateTime) return value;
+    if (value is Timestamp) return value.toDate();
+    if (value is String) {
+      return DateTime.tryParse(value) ?? DateTime.now();
+    }
     try {
       return (value as dynamic).toDate() as DateTime;
     } catch (_) {
@@ -66,7 +71,7 @@ class ProductDto {
   factory ProductDto.fromMap(Map<String, dynamic> map, String documentId) {
     final curStock = map['currentStock'] as int? ?? map['stockQuantity'] as int? ?? 50;
     final resStock = map['reservedStock'] as int? ?? 0;
-    final avStock = map['availableStock'] as int? ?? map['stockQuantity'] as int? ?? (curStock - resStock);
+    final avStock = (map['availableStock'] as int? ?? map['stockQuantity'] as int? ?? (curStock - resStock)).clamp(0, curStock);
     final minStock = map['minimumStock'] as int? ?? map['minStock'] as int? ?? 5;
     final alertQty = map['reorderLevel'] as int? ?? map['alertQuantity'] as int? ?? 10;
 
@@ -111,8 +116,8 @@ class ProductDto {
       'categoryId': categoryId,
       FirestoreConstants.isFeatured: isFeatured,
       FirestoreConstants.isAvailable: isAvailable,
-      FirestoreConstants.createdAt: createdAt.toIso8601String(),
-      FirestoreConstants.updatedAt: updatedAt.toIso8601String(),
+      FirestoreConstants.createdAt: Timestamp.fromDate(createdAt),
+      FirestoreConstants.updatedAt: Timestamp.fromDate(updatedAt),
       'productType': productType,
       'status': status,
       'currentStock': currentStock,

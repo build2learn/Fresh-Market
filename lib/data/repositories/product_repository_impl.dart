@@ -164,9 +164,24 @@ class ProductRepositoryImpl implements ProductRepository {
   @override
   Future<Result<List<ProductEntity>>> searchProducts(String query) async {
     try {
-      final dtos = await _firebaseDataSource.getProducts(limit: 100);
-      final entities = dtos.map((dto) => ProductModel.fromDto(dto).toEntity()).toList();
       final lowercaseQuery = query.toLowerCase();
+      final cached = await _localDataSource.getAll();
+      
+      if (cached.isNotEmpty) {
+        final entities = cached.map((dto) => ProductModel.fromDto(dto).toEntity()).toList();
+        final filtered = entities.where((p) {
+          return p.nameAr.toLowerCase().contains(lowercaseQuery) ||
+                 p.nameEn.toLowerCase().contains(lowercaseQuery) ||
+                 (p.descriptionAr?.toLowerCase().contains(lowercaseQuery) ?? false) ||
+                 (p.descriptionEn?.toLowerCase().contains(lowercaseQuery) ?? false);
+        }).toList();
+        return Success(filtered);
+      }
+
+      final dtos = await _firebaseDataSource.getProducts(limit: 100);
+      await _localDataSource.cacheAll(dtos);
+      
+      final entities = dtos.map((dto) => ProductModel.fromDto(dto).toEntity()).toList();
       final filtered = entities.where((p) {
         return p.nameAr.toLowerCase().contains(lowercaseQuery) ||
                p.nameEn.toLowerCase().contains(lowercaseQuery) ||

@@ -11,13 +11,7 @@ import 'package:intl/intl.dart';
 
 final _adminOrderDetailProvider = StreamProvider.family.autoDispose<OrderEntity?, String>((ref, id) {
   final repo = ref.watch(orderRepositoryProvider);
-  return repo.watchOrders().map((list) {
-    try {
-      return list.firstWhere((o) => o.id == id);
-    } catch (_) {
-      return null;
-    }
-  });
+  return repo.watchOrder(id);
 });
 
 class AdminOrderDetailPage extends ConsumerStatefulWidget {

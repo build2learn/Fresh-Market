@@ -5,5 +5,6 @@ import '../repositories/expense_repository_impl.dart';
 
 final expenseRepositoryProvider = Provider<ExpenseRepository>((ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
-  return ExpenseRepositoryImpl(firestore: firestore);
+  final auth = ref.watch(firebaseAuthProvider);
+  return ExpenseRepositoryImpl(firestore: firestore, auth: auth);
 });

@@ -98,6 +98,11 @@ String _encode(dynamic value) {
     if (item is DateTime) {
       return item.toIso8601String();
     }
+    try {
+      if (item.runtimeType.toString().contains('Timestamp')) {
+        return (item as dynamic).toDate().toIso8601String();
+      }
+    } catch (_) {}
     return item;
   });
 }
@@ -658,6 +663,13 @@ class MockProductRepository implements ProductRepository {
       isAvailable: product.isAvailable,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
+      productType: product.productType,
+      status: product.status,
+      currentStock: product.currentStock,
+      reservedStock: product.reservedStock,
+      availableStock: product.availableStock,
+      minimumStock: product.minimumStock,
+      reorderLevel: product.reorderLevel,
     );
     all.add(dto);
     _saveAll(all);
@@ -684,6 +696,13 @@ class MockProductRepository implements ProductRepository {
       isAvailable: product.isAvailable,
       createdAt: all[idx].createdAt,
       updatedAt: DateTime.now(),
+      productType: product.productType,
+      status: product.status,
+      currentStock: product.currentStock,
+      reservedStock: product.reservedStock,
+      availableStock: product.availableStock,
+      minimumStock: product.minimumStock,
+      reorderLevel: product.reorderLevel,
     );
     all[idx] = updated;
     _saveAll(all);
@@ -1671,10 +1690,8 @@ class MockLookupRepository implements LookupRepository {
   Stream<List<LookupEntity>> watchLookups(String lookupType) {
     Timer.run(() {
       final list = _getLookups()
-          .where((l) => l.lookupType == lookupType)
           .map((l) => LookupModel.fromDto(l).toEntity())
           .toList();
-      list.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
       _controller.add(list);
     });
     return _controller.stream.map((list) {
@@ -1839,7 +1856,7 @@ class MockOrderRepository implements OrderRepository {
   }
 
   void _saveAll(List<OrderDto> list) {
-    _prefs.setStringList(_ordersKey, list.map((e) => jsonEncode(e.toMap()..['id'] = e.id)).toList());
+    _prefs.setStringList(_ordersKey, list.map((e) => _encode(e.toMap()..['id'] = e.id)).toList());
     _controller.add(list.map((dto) => OrderModel.fromDto(dto)).toList());
   }
 
@@ -1920,6 +1937,17 @@ class MockOrderRepository implements OrderRepository {
       }
       filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return filtered;
+    });
+  }
+
+  @override
+  Stream<OrderEntity?> watchOrder(String orderId) {
+    return watchOrders().map((list) {
+      try {
+        return list.firstWhere((o) => o.id == orderId);
+      } catch (_) {
+        return null;
+      }
     });
   }
 
@@ -3799,7 +3827,7 @@ class MockWarehouseRepository implements WarehouseRepository {
         reorderLevel: old.reorderLevel,
       );
       products[idx] = updated;
-      _prefs.setStringList(MockProductRepository._productsKey, products.map((p) => jsonEncode(p.toMap()..['id'] = p.id)).toList());
+      _prefs.setStringList(MockProductRepository._productsKey, products.map((p) => _encode(p.toMap()..['id'] = p.id)).toList());
     }
   }
 

@@ -194,6 +194,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
           DropdownButtonFormField<String>(
             value: widget.state.weightUnitId.isNotEmpty ? widget.state.weightUnitId : null,
             decoration: InputDecoration(labelText: context.l10n.weightUnit),
+            hint: const Text('Select Weight Unit'),
             items: widget.weightUnitItems,
             onChanged: (v) {
               if (v != null) widget.onWeightUnitIdChanged(v);
@@ -203,6 +204,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
           DropdownButtonFormField<String>(
             value: widget.state.categoryId.isNotEmpty ? widget.state.categoryId : null,
             decoration: InputDecoration(labelText: context.l10n.selectCategory),
+            hint: const Text('Select Category'),
             items: widget.categoryItems,
             onChanged: (v) {
               if (v != null) widget.onCategoryIdChanged(v);
@@ -212,6 +214,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
           DropdownButtonFormField<String>(
             value: widget.state.productType.isNotEmpty ? widget.state.productType : null,
             decoration: const InputDecoration(labelText: 'Product Type / نوع المنتج'),
+            hint: const Text('Select Product Type'),
             items: widget.productTypeItems,
             onChanged: (v) {
               if (v != null && widget.onProductTypeChanged != null) widget.onProductTypeChanged!(v);
@@ -221,6 +224,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
           DropdownButtonFormField<String>(
             value: widget.state.status.isNotEmpty ? widget.state.status : null,
             decoration: const InputDecoration(labelText: 'Product Status / حالة المنتج'),
+            hint: const Text('Select Status'),
             items: widget.productStatusItems,
             onChanged: (v) {
               if (v != null && widget.onProductStatusChanged != null) widget.onProductStatusChanged!(v);

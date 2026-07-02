@@ -382,17 +382,28 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             return Scaffold(
               body: Row(
                 children: [
-                  NavigationRail(
-                    selectedIndex: selectedIndex,
-                    labelType: NavigationRailLabelType.all,
-                    destinations: visibleDestinations
-                        .map((d) => NavigationRailDestination(
-                              icon: Icon(d.icon),
-                              label: Text(d.label),
-                            ))
-                        .toList(),
-                    onDestinationSelected: (index) {
-                      context.go(visibleDestinations[index].route);
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                          child: IntrinsicHeight(
+                            child: NavigationRail(
+                              selectedIndex: selectedIndex,
+                              labelType: NavigationRailLabelType.all,
+                              destinations: visibleDestinations
+                                  .map((d) => NavigationRailDestination(
+                                        icon: Icon(d.icon),
+                                        label: Text(d.label),
+                                      ))
+                                  .toList(),
+                              onDestinationSelected: (index) {
+                                context.go(visibleDestinations[index].route);
+                              },
+                            ),
+                          ),
+                        ),
+                      );
                     },
                   ),
                   const VerticalDivider(width: 1),

@@ -5,5 +5,6 @@ import '../repositories/supplier_payment_repository_impl.dart';
 
 final supplierPaymentRepositoryProvider = Provider<SupplierPaymentRepository>((ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
-  return SupplierPaymentRepositoryImpl(firestore: firestore);
+  final auth = ref.watch(firebaseAuthProvider);
+  return SupplierPaymentRepositoryImpl(firestore: firestore, auth: auth);
 });

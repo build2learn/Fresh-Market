@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/constants/firestore_constants.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/utils/result.dart';
@@ -9,11 +10,19 @@ import '../models/supplier_payment_model.dart';
 
 class SupplierPaymentRepositoryImpl implements SupplierPaymentRepository {
   final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
 
-  SupplierPaymentRepositoryImpl({required FirebaseFirestore firestore}) : _firestore = firestore;
+  SupplierPaymentRepositoryImpl({
+    required FirebaseFirestore firestore,
+    FirebaseAuth? auth,
+  })  : _firestore = firestore,
+        _auth = auth ?? FirebaseAuth.instance;
 
   CollectionReference get _paymentsCol => _firestore.collection('supplier_payments');
   CollectionReference get _suppliersCol => _firestore.collection('suppliers');
+
+  String get _currentUserId => _auth.currentUser?.uid ?? 'system';
+  String get _currentUserEmail => _auth.currentUser?.email ?? 'system@freshmarket.com';
 
   @override
   Future<Result<List<SupplierPaymentEntity>>> getPayments({String? supplierId}) async {
@@ -49,31 +58,51 @@ class SupplierPaymentRepositoryImpl implements SupplierPaymentRepository {
 
   @override
   Future<Result<SupplierPaymentEntity>> createPayment(SupplierPaymentEntity payment) async {
+    if (payment.amount <= 0) {
+      return Failure(const FirestoreException(message: 'Payment amount must be greater than zero'));
+    }
     try {
-      final batch = _firestore.batch();
-      
       final docRef = _paymentsCol.doc();
-      final paymentModel = SupplierPaymentModel.fromEntity(payment.copyWith(id: docRef.id));
-      
-      batch.set(
-        docRef,
-        paymentModel.toMap()
-          ..[FirestoreConstants.createdAt] = FieldValue.serverTimestamp()
-          ..[FirestoreConstants.updatedAt] = FieldValue.serverTimestamp(),
+      final finalPayment = payment.copyWith(
+        id: docRef.id,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
 
-      final supplierRef = _suppliersCol.doc(payment.supplierId);
-      batch.update(supplierRef, {
-        'balance': FieldValue.increment(-payment.amount),
-        FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
+      await _firestore.runTransaction((transaction) async {
+        // Read Phase: verify supplier existence
+        final supplierRef = _suppliersCol.doc(payment.supplierId);
+        final supplierSnap = await transaction.get(supplierRef);
+        if (!supplierSnap.exists) {
+          throw const FirestoreException(message: 'Supplier not found');
+        }
+
+        final paymentModel = SupplierPaymentModel.fromEntity(finalPayment);
+        transaction.set(
+          docRef,
+          paymentModel.toMap()
+            ..[FirestoreConstants.createdAt] = FieldValue.serverTimestamp()
+            ..[FirestoreConstants.updatedAt] = FieldValue.serverTimestamp(),
+        );
+
+        transaction.update(supplierRef, {
+          'balance': FieldValue.increment(-payment.amount),
+          FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
+        });
+
+        // Audit Trail entry
+        final logRef = _firestore.collection('audit_logs').doc();
+        transaction.set(logRef, {
+          'id': logRef.id,
+          'userId': _currentUserId,
+          'userEmail': _currentUserEmail,
+          'action': 'Create Supplier Payment',
+          'details': 'Recorded payment of ${payment.amount} EGP to supplier ${payment.supplierName} (Ref: ${payment.referenceNumber})',
+          'timestamp': FieldValue.serverTimestamp(),
+        });
       });
 
-      await batch.commit();
-      
-      // Fetch completed document to get server timestamps for completeness
-      final doc = await docRef.get();
-      final dto = SupplierPaymentDto.fromMap(doc.data() as Map<String, dynamic>, doc.id);
-      return Success(SupplierPaymentModel.fromDto(dto).toEntity());
+      return Success(finalPayment);
     } catch (e) {
       return Failure(FirestoreException(message: e.toString()));
     }
@@ -82,28 +111,45 @@ class SupplierPaymentRepositoryImpl implements SupplierPaymentRepository {
   @override
   Future<Result<void>> deletePayment(String paymentId) async {
     try {
-      final paymentSnapshot = await _paymentsCol.doc(paymentId).get();
-      if (!paymentSnapshot.exists) {
-        return Failure(FirestoreException(message: 'Payment not found'));
-      }
-      
-      final paymentMap = paymentSnapshot.data() as Map<String, dynamic>;
-      final supplierId = paymentMap['supplierId'] as String;
-      final amount = (paymentMap['amount'] as num).toDouble();
-      
-      final batch = _firestore.batch();
-      
-      // Delete the payment document
-      batch.delete(_paymentsCol.doc(paymentId));
-      
-      // Increment the supplier balance back by payment amount
-      final supplierRef = _suppliersCol.doc(supplierId);
-      batch.update(supplierRef, {
-        'balance': FieldValue.increment(amount),
-        FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
+      final docRef = _paymentsCol.doc(paymentId);
+
+      await _firestore.runTransaction((transaction) async {
+        // Read Phase inside transaction to avoid race conditions
+        final paymentSnapshot = await transaction.get(docRef);
+        if (!paymentSnapshot.exists) {
+          throw const FirestoreException(message: 'Payment not found');
+        }
+
+        final paymentMap = paymentSnapshot.data() as Map<String, dynamic>;
+        final supplierId = paymentMap['supplierId'] as String? ?? '';
+        final amount = (paymentMap['amount'] as num? ?? 0.0).toDouble();
+        final supplierName = paymentMap['supplierName'] as String? ?? '';
+        final refNum = paymentMap['referenceNumber'] as String? ?? '';
+
+        // Delete the payment document
+        transaction.delete(docRef);
+
+        // Increment the supplier balance back by payment amount
+        if (supplierId.isNotEmpty) {
+          final supplierRef = _suppliersCol.doc(supplierId);
+          transaction.update(supplierRef, {
+            'balance': FieldValue.increment(amount),
+            FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
+          });
+        }
+
+        // Audit Trail entry
+        final logRef = _firestore.collection('audit_logs').doc();
+        transaction.set(logRef, {
+          'id': logRef.id,
+          'userId': _currentUserId,
+          'userEmail': _currentUserEmail,
+          'action': 'Delete Supplier Payment',
+          'details': 'Deleted payment of $amount EGP to supplier $supplierName (Ref: $refNum)',
+          'timestamp': FieldValue.serverTimestamp(),
+        });
       });
-      
-      await batch.commit();
+
       return const Success(null);
     } catch (e) {
       return Failure(FirestoreException(message: e.toString()));

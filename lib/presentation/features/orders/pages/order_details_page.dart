@@ -11,13 +11,7 @@ import '../../auth/providers/auth_providers.dart';
 
 final _customerOrderDetailProvider = StreamProvider.family.autoDispose<OrderEntity?, String>((ref, id) {
   final repo = ref.watch(orderRepositoryProvider);
-  return repo.watchOrders().map((list) {
-    try {
-      return list.firstWhere((o) => o.id == id);
-    } catch (_) {
-      return null;
-    }
-  });
+  return repo.watchOrder(id);
 });
 
 class CustomerOrderDetailPage extends ConsumerStatefulWidget {

@@ -5,5 +5,6 @@ import '../repositories/warehouse_repository_impl.dart';
 
 final warehouseRepositoryProvider = Provider<WarehouseRepository>((ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
-  return WarehouseRepositoryImpl(firestore: firestore);
+  final auth = ref.watch(firebaseAuthProvider);
+  return WarehouseRepositoryImpl(firestore: firestore, auth: auth);
 });

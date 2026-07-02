@@ -89,98 +89,106 @@ class _OfferFormWidgetState extends State<OfferFormWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (widget.onImageSelected != null) _buildImageSection(context),
-          if (widget.onImageSelected != null) const SizedBox(height: 24),
-          TextField(
-            decoration: InputDecoration(labelText: context.l10n.offerTitle),
-            textDirection: TextDirection.rtl,
-            controller: _titleArController,
-            onChanged: widget.onTitleArChanged,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            decoration: InputDecoration(labelText: '${context.l10n.offerTitle} (English)'),
-            textDirection: TextDirection.ltr,
-            controller: _titleEnController,
-            onChanged: widget.onTitleEnChanged,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            decoration: InputDecoration(labelText: '${context.l10n.offerDescription} (Arabic)'),
-            textDirection: TextDirection.rtl,
-            maxLines: 3,
-            controller: _descriptionArController,
-            onChanged: widget.onDescriptionArChanged,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            decoration: InputDecoration(labelText: '${context.l10n.offerDescription} (English)'),
-            textDirection: TextDirection.ltr,
-            maxLines: 3,
-            controller: _descriptionEnController,
-            onChanged: widget.onDescriptionEnChanged,
-          ),
-          const SizedBox(height: 16),
-          _buildDateField(
-            context,
-            label: context.l10n.startDate,
-            date: widget.state.startDate,
-            onPicked: widget.onStartDateChanged,
-          ),
-          const SizedBox(height: 16),
-          _buildDateField(
-            context,
-            label: context.l10n.endDate,
-            date: widget.state.endDate,
-            onPicked: widget.onEndDateChanged,
-          ),
-          DropdownButtonFormField<String>(
-            value: widget.state.offerType.isNotEmpty ? widget.state.offerType : null,
-            decoration: const InputDecoration(labelText: 'Offer Type / نوع العرض'),
-            items: widget.offerTypeItems,
-            onChanged: (v) {
-              if (v != null && widget.onOfferTypeChanged != null) widget.onOfferTypeChanged!(v);
-            },
-          ),
-          const SizedBox(height: 16),
-          SwitchListTile(
-            title: Text(widget.state.isActive ? context.l10n.active : context.l10n.inactive),
-            value: widget.state.isActive,
-            onChanged: widget.onActiveChanged,
-          ),
-          const SizedBox(height: 16),
-          Text(context.l10n.includeProducts, style: context.textTheme.titleMedium),
-          const SizedBox(height: 8),
-          OfferProductSelector(
-            products: widget.products,
-            selectedProductIds: widget.state.selectedProductIds,
-            onProductToggled: widget.onProductToggled,
-          ),
-          const SizedBox(height: 16),
-          if (widget.state.errorMessage != null) ...[
-            Text(
-              widget.state.errorMessage!,
-              style: context.textTheme.bodySmall?.copyWith(
-                color: context.colorScheme.error,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 800),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (widget.onImageSelected != null) _buildImageSection(context),
+              if (widget.onImageSelected != null) const SizedBox(height: 24),
+              TextField(
+                decoration: InputDecoration(labelText: context.l10n.offerTitle),
+                textDirection: TextDirection.rtl,
+                controller: _titleArController,
+                onChanged: widget.onTitleArChanged,
               ),
-            ),
-            const SizedBox(height: 16),
-          ],
-          FilledButton(
-            onPressed: widget.state.isSubmitting ? null : widget.onSubmit,
-            child: widget.state.isSubmitting
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(context.l10n.save),
+              const SizedBox(height: 16),
+              TextField(
+                decoration: InputDecoration(labelText: '${context.l10n.offerTitle} (English)'),
+                textDirection: TextDirection.ltr,
+                controller: _titleEnController,
+                onChanged: widget.onTitleEnChanged,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                decoration: InputDecoration(labelText: '${context.l10n.offerDescription} (Arabic)'),
+                textDirection: TextDirection.rtl,
+                maxLines: 3,
+                controller: _descriptionArController,
+                onChanged: widget.onDescriptionArChanged,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                decoration: InputDecoration(labelText: '${context.l10n.offerDescription} (English)'),
+                textDirection: TextDirection.ltr,
+                maxLines: 3,
+                controller: _descriptionEnController,
+                onChanged: widget.onDescriptionEnChanged,
+              ),
+              const SizedBox(height: 16),
+              _buildDateField(
+                context,
+                label: context.l10n.startDate,
+                date: widget.state.startDate,
+                onPicked: widget.onStartDateChanged,
+              ),
+              const SizedBox(height: 16),
+              _buildDateField(
+                context,
+                label: context.l10n.endDate,
+                date: widget.state.endDate,
+                onPicked: widget.onEndDateChanged,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: widget.state.offerType.isNotEmpty ? widget.state.offerType : null,
+                decoration: const InputDecoration(labelText: 'Offer Type / نوع العرض'),
+                items: widget.offerTypeItems,
+                onChanged: (v) {
+                  if (v != null && widget.onOfferTypeChanged != null) widget.onOfferTypeChanged!(v);
+                },
+              ),
+              const SizedBox(height: 16),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(widget.state.isActive ? context.l10n.active : context.l10n.inactive),
+                value: widget.state.isActive,
+                onChanged: widget.onActiveChanged,
+              ),
+              const SizedBox(height: 16),
+              Text(context.l10n.includeProducts, style: context.textTheme.titleMedium),
+              const SizedBox(height: 8),
+              OfferProductSelector(
+                products: widget.products,
+                selectedProductIds: widget.state.selectedProductIds,
+                onProductToggled: widget.onProductToggled,
+              ),
+              const SizedBox(height: 16),
+              if (widget.state.errorMessage != null) ...[
+                Text(
+                  widget.state.errorMessage!,
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: context.colorScheme.error,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              FilledButton(
+                onPressed: widget.state.isSubmitting ? null : widget.onSubmit,
+                child: widget.state.isSubmitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(context.l10n.save),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

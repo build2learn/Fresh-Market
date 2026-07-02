@@ -11,18 +11,8 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
-    function isStaff() {
-      return isAuthenticated() && 
-        resource.data.role != 'customer' &&
-        getUserData().role != 'customer';
-    }
-
     function isStaffUser(userData) {
       return userData != null && userData.role != 'customer';
-    }
-
-    function isAdmin() {
-      return isAuthenticated() && getUserData().role == 'admin';
     }
 
     function isOwner(userId) {
@@ -54,9 +44,18 @@ service cloud.firestore {
 
     // orders
     match /orders/{orderId} {
-      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
-      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isStaffUser(getUserData()));
-      allow update, delete: if isAuthenticated() && isStaffUser(getUserData());
+      allow create: if isAuthenticated() && (isOwner(request.resource.data.userId) || isOwner(request.resource.data.customerId));
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isOwner(resource.data.customerId) || isStaffUser(getUserData()));
+      allow update: if isAuthenticated() && (
+        isStaffUser(getUserData()) ||
+        ((isOwner(resource.data.userId) || isOwner(resource.data.customerId)) &&
+         request.resource.data.status == 'Cancelled' &&
+         resource.data.status == 'Pending' &&
+         request.resource.data.customerId == resource.data.customerId &&
+         request.resource.data.userId == resource.data.userId &&
+         request.resource.data.total == resource.data.total)
+      );
+      allow delete: if isAuthenticated() && isStaffUser(getUserData());
     }
 
     // audit_logs
@@ -97,7 +96,8 @@ service cloud.firestore {
 
     // suppliers
     match /suppliers/{supplierId} {
-      allow read, write: if isAuthenticated() && isStaffUser(getUserData());
+      allow read: if isAuthenticated() && isStaffUser(getUserData());
+      allow write: if isAuthenticated() && isStaffUser(getUserData()) && (getUserData().role == 'admin' || getUserData().role == 'manager');
     }
 
     // purchase_orders
@@ -107,7 +107,38 @@ service cloud.firestore {
 
     // supplier_payments
     match /supplier_payments/{paymentId} {
-      allow read, write: if isAuthenticated() && isStaffUser(getUserData());
+      allow read: if isAuthenticated() && isStaffUser(getUserData());
+      allow write: if isAuthenticated() && isStaffUser(getUserData()) && (getUserData().role == 'admin' || getUserData().role == 'manager');
+    }
+
+    // expenses
+    match /expenses/{expenseId} {
+      allow read: if isAuthenticated() && isStaffUser(getUserData());
+      allow write: if isAuthenticated() && isStaffUser(getUserData()) && (getUserData().role == 'admin' || getUserData().role == 'manager');
+    }
+
+    // warehouses
+    match /warehouses/{warehouseId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isStaffUser(getUserData()) && (getUserData().role == 'admin' || getUserData().role == 'manager');
+    }
+
+    // warehouse_inventories
+    match /warehouse_inventories/{inventoryId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isStaffUser(getUserData()) && (getUserData().role == 'admin' || getUserData().role == 'manager');
+    }
+
+    // stock_transfers
+    match /stock_transfers/{transferId} {
+      allow read: if isAuthenticated() && isStaffUser(getUserData());
+      allow write: if isAuthenticated() && isStaffUser(getUserData()) && (getUserData().role == 'admin' || getUserData().role == 'manager');
+    }
+
+    // batches
+    match /batches/{batchId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isStaffUser(getUserData());
     }
   }
 }

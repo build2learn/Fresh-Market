@@ -30,13 +30,13 @@ class _AdminCategoriesPageState extends ConsumerState<AdminCategoriesPage> {
       ref.read(categoryListProvider.notifier).startRealtimeSync();
     });
   }
-
   @override
   void dispose() {
-    ref.read(categoryListProvider.notifier).stopRealtimeSync();
+    try {
+      ref.read(categoryListProvider.notifier).stopRealtimeSync();
+    } catch (_) {}
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(categoryListProvider);

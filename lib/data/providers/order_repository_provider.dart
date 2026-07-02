@@ -5,5 +5,6 @@ import '../repositories/order_repository_impl.dart';
 
 final orderRepositoryProvider = Provider<OrderRepository>((ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
-  return OrderRepositoryImpl(firestore: firestore);
+  final auth = ref.watch(firebaseAuthProvider);
+  return OrderRepositoryImpl(firestore: firestore, auth: auth);
 });

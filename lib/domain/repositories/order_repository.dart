@@ -15,6 +15,8 @@ abstract interface class OrderRepository {
     String? searchQuery,
   });
 
+  Stream<OrderEntity?> watchOrder(String orderId);
+
   Future<Result<OrderEntity>> createOrder(OrderEntity order);
 
   Future<Result<void>> updateOrderStatus(String orderId, String status);

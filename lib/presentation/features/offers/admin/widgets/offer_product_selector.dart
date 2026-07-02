@@ -50,7 +50,7 @@ class _OfferProductSelectorState extends ConsumerState<OfferProductSelector> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: TextField(
             controller: _searchController,
             decoration: InputDecoration(
@@ -74,6 +74,8 @@ class _OfferProductSelectorState extends ConsumerState<OfferProductSelector> {
             title: Text(isRtl ? product.nameAr : product.nameEn),
             subtitle: Text(context.formatPrice(product.price)),
             value: isSelected,
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
             onChanged: (_) => widget.onProductToggled(product.id),
           );
         }),

@@ -27,13 +27,13 @@ class _AdminProductsPageState extends ConsumerState<AdminProductsPage> {
       ref.read(productListProvider.notifier).startRealtimeSync();
     });
   }
-
   @override
   void dispose() {
-    ref.read(productListProvider.notifier).stopRealtimeSync();
+    try {
+      ref.read(productListProvider.notifier).stopRealtimeSync();
+    } catch (_) {}
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(productListProvider);

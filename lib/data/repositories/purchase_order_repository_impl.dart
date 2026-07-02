@@ -105,62 +105,104 @@ class PurchaseOrderRepositoryImpl implements PurchaseOrderRepository {
       final poData = poDoc.data() as Map<String, dynamic>;
       final supplierId = poData['supplierId'] as String? ?? '';
 
-      final batch = _firestore.batch();
-      double poCost = 0.0;
-      
-      for (final item in receivedItems) {
-        final prodRef = _productsCol.doc(item.productId);
-        batch.update(prodRef, {
-          'currentStock': FieldValue.increment(item.quantityReceived),
-          'availableStock': FieldValue.increment(item.quantityReceived),
-          'stockQuantity': FieldValue.increment(item.quantityReceived), // legacy sync
+      await _firestore.runTransaction((transaction) async {
+        // Read Phase: Get all product documents for accurate stock tracking
+        final productSnapshots = <String, DocumentSnapshot>{};
+        for (final item in receivedItems) {
+          final prodRef = _productsCol.doc(item.productId);
+          productSnapshots[item.productId] = await transaction.get(prodRef);
+        }
+
+        double poCost = 0.0;
+
+        // Write Phase: Update products, create batches, log history
+        for (final item in receivedItems) {
+          if (item.quantityReceived <= 0) continue;
+
+          final prodRef = _productsCol.doc(item.productId);
+          final prodSnap = productSnapshots[item.productId]!;
+          final prodData = prodSnap.exists ? prodSnap.data() as Map<String, dynamic> : <String, dynamic>{};
+
+          final curStock = prodData['currentStock'] as int? ?? prodData['stockQuantity'] as int? ?? 0;
+          final avStock = prodData['availableStock'] as int? ?? prodData['stockQuantity'] as int? ?? curStock;
+          final newCurrent = curStock + item.quantityReceived;
+          final newAvailable = avStock + item.quantityReceived;
+
+          transaction.update(prodRef, {
+            'currentStock': newCurrent,
+            'availableStock': newAvailable,
+            'stockQuantity': newAvailable, // legacy sync
+            FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
+          });
+
+          poCost += item.quantityReceived * item.unitCost;
+
+          // Create batch document in the batches collection
+          final batchRef = _firestore.collection('batches').doc();
+          final batchCode = (item.batchCode != null && item.batchCode!.isNotEmpty)
+              ? item.batchCode!
+              : 'B-PO-$poId-${item.productId}';
+          final expiryDate = item.expiryDate ?? DateTime.now().add(const Duration(days: 30));
+
+          transaction.set(batchRef, {
+            'productId': item.productId,
+            'batchCode': batchCode,
+            'initialQuantity': item.quantityReceived,
+            'currentQuantity': item.quantityReceived,
+            'availableQuantity': item.quantityReceived,
+            'reservedQuantity': 0,
+            'unitCost': item.unitCost,
+            'manufactureDate': FieldValue.serverTimestamp(),
+            'expiryDate': Timestamp.fromDate(expiryDate),
+            FirestoreConstants.createdAt: FieldValue.serverTimestamp(),
+            FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
+          });
+
+          // Write accurate stock history
+          final historyRef = _firestore.collection('stock_history').doc();
+          transaction.set(historyRef, {
+            'id': historyRef.id,
+            'productId': item.productId,
+            'productNameAr': prodData['nameAr'] as String? ?? '',
+            'productNameEn': item.productName,
+            'type': 'receipt',
+            'quantityChanged': item.quantityReceived,
+            'previousStock': curStock,
+            'newStock': newCurrent,
+            'batchCode': batchCode,
+            'reasonAr': 'تم استلام المنتجات عبر أمر الشراء $poId',
+            'reasonEn': 'Received via purchase order $poId',
+            'createdAt': FieldValue.serverTimestamp(),
+            'createdBy': 'system',
+          });
+        }
+
+        // Update PO status and items
+        final poRef = _posCol.doc(poId);
+        final rawItems = receivedItems.map((e) => {
+          'productId': e.productId,
+          'productName': e.productName,
+          'quantityOrdered': e.quantityOrdered,
+          'quantityReceived': e.quantityReceived,
+          'unitCost': e.unitCost,
+        }).toList();
+
+        transaction.update(poRef, {
+          'status': 'Received',
+          'items': rawItems,
           FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
         });
 
-        poCost += item.quantityReceived * item.unitCost;
-
-        // Write to stock history
-        final historyRef = _firestore.collection('stock_history').doc();
-        batch.set(historyRef, {
-          'id': historyRef.id,
-          'productId': item.productId,
-          'productNameAr': '',
-          'productNameEn': item.productName,
-          'type': 'receipt',
-          'quantityChanged': item.quantityReceived,
-          'previousStock': 0, // placeholder
-          'newStock': 0, // placeholder
-          'reasonAr': 'تم استلام المنتجات عبر أمر الشراء $poId',
-          'reasonEn': 'Received via purchase order $poId',
-          'createdAt': FieldValue.serverTimestamp(),
-          'createdBy': 'system',
-        });
-      }
-
-      final poRef = _posCol.doc(poId);
-      final rawItems = receivedItems.map((e) => {
-        'productId': e.productId,
-        'productName': e.productName,
-        'quantityOrdered': e.quantityOrdered,
-        'quantityReceived': e.quantityReceived,
-        'unitCost': e.unitCost,
-      }).toList();
-      
-      batch.update(poRef, {
-        'status': 'Received',
-        'items': rawItems,
-        FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
+        // Update supplier balance
+        if (supplierId.isNotEmpty && poCost > 0) {
+          final supplierRef = _firestore.collection('suppliers').doc(supplierId);
+          transaction.update(supplierRef, {
+            'balance': FieldValue.increment(poCost),
+            FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
+          });
+        }
       });
 
-      if (supplierId.isNotEmpty && poCost > 0) {
-        final supplierRef = _firestore.collection('suppliers').doc(supplierId);
-        batch.update(supplierRef, {
-          'balance': FieldValue.increment(poCost),
-          FirestoreConstants.updatedAt: FieldValue.serverTimestamp(),
-        });
-      }
-
-      await batch.commit();
       return const Success(null);
     } catch (e) {
       return Failure(FirestoreException(message: e.toString()));
