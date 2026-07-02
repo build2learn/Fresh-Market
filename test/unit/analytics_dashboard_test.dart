@@ -36,6 +36,11 @@ void main() {
 
       final now = DateTime.now();
       
+      // Calculate a date that is guaranteed to be in the same month as 'now' but not today
+      final testOrd3Date = now.day == 1 
+          ? now.add(const Duration(days: 1)) 
+          : now.subtract(const Duration(days: 1));
+
       // Seed Mock Orders with specific dates and statuses
       final ordersList = [
         // Today - Delivered (should count towards revenue today & month, orders count today & month)
@@ -76,15 +81,15 @@ void main() {
             }
           ],
         },
-        // 5 Days Ago - Delivered (should count towards orders month, revenue month, but NOT today)
+        // Same Month, Not Today - Delivered (should count towards orders month, revenue month, but NOT today)
         {
           'id': 'test_ord_3',
           'userId': 'customer_1',
           'userEmail': 'c1@test.com',
           'status': 'Delivered',
           'totalAmount': 300.0,
-          'createdAt': now.subtract(const Duration(days: 5)).toIso8601String(),
-          'updatedAt': now.subtract(const Duration(days: 5)).toIso8601String(),
+          'createdAt': testOrd3Date.toIso8601String(),
+          'updatedAt': testOrd3Date.toIso8601String(),
           'items': [
             {
               'productId': 'prod_frozen_burger',
