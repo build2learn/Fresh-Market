@@ -210,12 +210,26 @@ final List<_AdminNavDestination> _allAdminDestinations = [
   ),
 ];
 
+class RouterTransitionNotifier extends ChangeNotifier {
+  RouterTransitionNotifier(Ref ref) {
+    ref.listen(authNotifierProvider, (_, __) {
+      notifyListeners();
+    });
+  }
+}
+
+final routerTransitionNotifierProvider = Provider<RouterTransitionNotifier>((ref) {
+  return RouterTransitionNotifier(ref);
+});
+
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authGuard = AuthGuard(ref);
   final adminGuard = AdminGuard(ref);
+  final refreshNotifier = ref.watch(routerTransitionNotifierProvider);
 
   return GoRouter(
     initialLocation: RouteConstants.splash,
+    refreshListenable: refreshNotifier,
     redirect: (context, state) {
       debugPrint('[ROUTER] navigation: location=${state.matchedLocation}');
       final authRedirect = authGuard(context, state);
