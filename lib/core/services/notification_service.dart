@@ -46,7 +46,9 @@ class NotificationService {
           settings.authorizationStatus == AuthorizationStatus.provisional) {
         
         // Background message handler
-        FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+        if (!kIsWeb) {
+          FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+        }
 
         // Get the token
         try {
