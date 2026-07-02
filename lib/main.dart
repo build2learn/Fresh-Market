@@ -35,6 +35,10 @@ import 'package:fresh_market/data/providers/warehouse_repository_provider.dart';
 const _dataVersion = 'v4';
 const _dataVersionKey = 'mock_data_version';
 
+/// Toggle between mock services and real Firebase production services.
+/// Pass --dart-define=USE_MOCK=false to compile/run in real Firebase mode.
+const bool useMock = bool.fromEnvironment('USE_MOCK', defaultValue: true);
+
 void main() async {
   print("[BOOT] main started");
   print("[BOOT] bootstrap started");
@@ -63,33 +67,37 @@ void main() async {
   // Re-read prefs after potential clear
   final freshPrefs = await SharedPreferences.getInstance();
 
-  print("[RUNAPP] runApp called");
+  print("[RUNAPP] runApp called - useMock=$useMock");
   runApp(
     ProviderScope(
-      overrides: [
-        firebaseInitResultProvider.overrideWithValue(FirebaseInitResult.initialized),
-        sharedPreferencesProvider.overrideWith((ref) => freshPrefs),
-        authRepositoryProvider.overrideWithValue(MockAuthRepository(freshPrefs)),
-        categoryRepositoryProvider.overrideWithValue(MockCategoryRepository(freshPrefs)),
-        productRepositoryProvider.overrideWithValue(MockProductRepository(freshPrefs)),
-        offerRepositoryProvider.overrideWithValue(MockOfferRepository(freshPrefs)),
-        weightUnitRepositoryProvider.overrideWithValue(MockWeightUnitRepository(freshPrefs)),
-        settingsRepositoryProvider.overrideWithValue(MockSettingsRepository(freshPrefs)),
-        userRepositoryProvider.overrideWithValue(MockUserRepository(freshPrefs)),
-        notificationRepositoryProvider.overrideWithValue(MockNotificationRepository(freshPrefs)),
-        lookupRepositoryProvider.overrideWithValue(MockLookupRepository(freshPrefs)),
-        orderRepositoryProvider.overrideWithValue(MockOrderRepository(freshPrefs)),
-        addressRepositoryProvider.overrideWithValue(MockAddressRepository(freshPrefs)),
-        couponRepositoryProvider.overrideWithValue(MockCouponRepository(freshPrefs)),
-        auditLogRepositoryProvider.overrideWithValue(MockAuditLogRepository(freshPrefs)),
-        supplierRepositoryProvider.overrideWithValue(MockSupplierRepository(freshPrefs)),
-        purchaseOrderRepositoryProvider.overrideWithValue(MockPurchaseOrderRepository(freshPrefs)),
-        stockHistoryRepositoryProvider.overrideWithValue(MockStockHistoryRepository(freshPrefs)),
-        supplierPaymentRepositoryProvider.overrideWithValue(MockSupplierPaymentRepository(freshPrefs)),
-        batchRepositoryProvider.overrideWithValue(MockBatchRepository(freshPrefs)),
-        expenseRepositoryProvider.overrideWithValue(MockExpenseRepository(freshPrefs)),
-        warehouseRepositoryProvider.overrideWithValue(MockWarehouseRepository(freshPrefs)),
-      ],
+      overrides: useMock
+          ? [
+              firebaseInitResultProvider.overrideWithValue(FirebaseInitResult.initialized),
+              sharedPreferencesProvider.overrideWith((ref) => freshPrefs),
+              authRepositoryProvider.overrideWithValue(MockAuthRepository(freshPrefs)),
+              categoryRepositoryProvider.overrideWithValue(MockCategoryRepository(freshPrefs)),
+              productRepositoryProvider.overrideWithValue(MockProductRepository(freshPrefs)),
+              offerRepositoryProvider.overrideWithValue(MockOfferRepository(freshPrefs)),
+              weightUnitRepositoryProvider.overrideWithValue(MockWeightUnitRepository(freshPrefs)),
+              settingsRepositoryProvider.overrideWithValue(MockSettingsRepository(freshPrefs)),
+              userRepositoryProvider.overrideWithValue(MockUserRepository(freshPrefs)),
+              notificationRepositoryProvider.overrideWithValue(MockNotificationRepository(freshPrefs)),
+              lookupRepositoryProvider.overrideWithValue(MockLookupRepository(freshPrefs)),
+              orderRepositoryProvider.overrideWithValue(MockOrderRepository(freshPrefs)),
+              addressRepositoryProvider.overrideWithValue(MockAddressRepository(freshPrefs)),
+              couponRepositoryProvider.overrideWithValue(MockCouponRepository(freshPrefs)),
+              auditLogRepositoryProvider.overrideWithValue(MockAuditLogRepository(freshPrefs)),
+              supplierRepositoryProvider.overrideWithValue(MockSupplierRepository(freshPrefs)),
+              purchaseOrderRepositoryProvider.overrideWithValue(MockPurchaseOrderRepository(freshPrefs)),
+              stockHistoryRepositoryProvider.overrideWithValue(MockStockHistoryRepository(freshPrefs)),
+              supplierPaymentRepositoryProvider.overrideWithValue(MockSupplierPaymentRepository(freshPrefs)),
+              batchRepositoryProvider.overrideWithValue(MockBatchRepository(freshPrefs)),
+              expenseRepositoryProvider.overrideWithValue(MockExpenseRepository(freshPrefs)),
+              warehouseRepositoryProvider.overrideWithValue(MockWarehouseRepository(freshPrefs)),
+            ]
+          : [
+              sharedPreferencesProvider.overrideWith((ref) => freshPrefs),
+            ],
       child: const FreshMarketApp(),
     ),
   );
