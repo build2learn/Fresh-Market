@@ -99,11 +99,12 @@ String _encode(dynamic value) {
       return item.toIso8601String();
     }
     try {
-      if (item.runtimeType.toString().contains('Timestamp')) {
-        return (item as dynamic).toDate().toIso8601String();
-      }
+      return (item as dynamic).toDate().toIso8601String();
     } catch (_) {}
-    return item;
+    try {
+      return (item as dynamic).toJson();
+    } catch (_) {}
+    return item.toString();
   });
 }
 
