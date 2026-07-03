@@ -2,11 +2,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'app.dart';
-import 'firebase_options.dart';
-import 'core/providers/firebase_providers.dart';
-import 'core/services/mock_repositories.dart';
-import 'core/services/notification_service.dart';
+import 'package:fresh_market/app.dart';
+import 'package:fresh_market/firebase_options.dart';
+import 'package:fresh_market/core/providers/firebase_providers.dart';
+import 'package:fresh_market/core/services/mock_repositories.dart';
+import 'package:fresh_market/core/services/notification_service.dart';
 
 import 'package:fresh_market/data/providers/auth_repository_provider.dart';
 import 'package:fresh_market/data/providers/category_repository_provider.dart';
