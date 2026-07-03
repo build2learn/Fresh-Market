@@ -56,12 +56,15 @@ void main() async {
   }
 
   print("[FIREBASE] initialize start");
+  FirebaseInitResult firebaseInitResult = FirebaseInitResult.notInitialized;
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     print("[FIREBASE] initialize success");
     await NotificationService.instance.initialize();
+    firebaseInitResult = FirebaseInitResult.initialized;
   } catch (e) {
     print("[FIREBASE] initialize failed: $e");
+    firebaseInitResult = FirebaseInitResult.failed(e.toString());
   }
 
   // Re-read prefs after potential clear
@@ -96,6 +99,7 @@ void main() async {
               warehouseRepositoryProvider.overrideWithValue(MockWarehouseRepository(freshPrefs)),
             ]
           : [
+              firebaseInitResultProvider.overrideWithValue(firebaseInitResult),
               sharedPreferencesProvider.overrideWith((ref) => freshPrefs),
             ],
       child: const FreshMarketApp(),
