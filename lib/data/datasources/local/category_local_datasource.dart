@@ -33,7 +33,13 @@ class CategoryLocalDataSourceImpl implements CategoryLocalDataSource {
 
   @override
   Future<void> cacheAll(List<CategoryDto> categories) async {
-    final json = jsonEncode(categories.map((c) => c.toMap()).toList());
+    final localMaps = categories.map((c) {
+      final map = c.toMap();
+      map['createdAt'] = c.createdAt.toIso8601String();
+      map['updatedAt'] = c.updatedAt.toIso8601String();
+      return map;
+    }).toList();
+    final json = jsonEncode(localMaps);
     await _prefs.setString(_cacheKey, json);
     await setLastSyncTimestamp(DateTime.now());
   }

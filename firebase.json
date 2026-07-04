@@ -1,1 +1,40 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"fresh-market-ecb8d","appId":"1:812344604161:android:cb253afb065f2701c9f200","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"fresh-market-ecb8d","configurations":{"android":"1:812344604161:android:cb253afb065f2701c9f200","web":"1:812344604161:web:60ab00867a662223c9f200"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "fresh-market-ecb8d",
+          "appId": "1:812344604161:android:cb253afb065f2701c9f200",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "fresh-market-ecb8d",
+          "configurations": {
+            "android": "1:812344604161:android:cb253afb065f2701c9f200",
+            "web": "1:812344604161:web:60ab00867a662223c9f200"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

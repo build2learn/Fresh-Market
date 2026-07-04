@@ -1,27 +1,18 @@
 ## Description
+Please describe the changes proposed in this Pull Request (PR), including the motivation and context.
 
-Please include a summary of the change and which issue is fixed.
-
-Fixes # (issue)
-
-## Type of change
-
+## Type of Change
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that causes existing functionality to not work as expected)
-- [ ] Refactor (code change without feature/fix)
-- [ ] Documentation update
-- [ ] CI/CD or build process change
+- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Security hardening (rules updates, authorization validations, transaction fixes)
 
-## Checklist
+## Checklist:
+- [ ] My code follows the code style of this project.
+- [ ] I have ran `flutter analyze` and fixed all warnings/errors.
+- [ ] I have ran `flutter test` and verified my changes pass tests.
+- [ ] I have updated/written the documentation accordingly.
+- [ ] Firebase Rules & Indexes have been tested and verify safe.
 
-- [ ] My code follows the project's coding standards
-- [ ] I have run `dart format .` and `flutter analyze` with zero issues
-- [ ] I have added tests that prove my fix is effective or my feature works
-- [ ] All existing tests pass (`flutter test`)
-- [ ] I have updated the documentation if needed
-- [ ] My changes generate no new warnings or errors
-
-## Screenshots (if applicable)
-
-## Additional context
+## Screenshots / Verification
+Add screenshots, console logs, or videos showing verification of the fix/feature.
