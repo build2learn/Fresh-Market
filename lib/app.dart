@@ -7,11 +7,12 @@ import 'package:fresh_market/l10n/app_localizations.dart';
 
 import 'package:fresh_market/core/providers/firebase_providers.dart';
 import 'package:fresh_market/core/providers/locale_provider.dart';
-import 'package:fresh_market/core/services/bootstrap.dart';
 import 'package:fresh_market/core/theme/app_theme.dart';
 import 'package:fresh_market/presentation/routing/app_router.dart';
 import 'package:fresh_market/core/services/notification_service.dart';
 import 'package:fresh_market/core/constants/route_constants.dart';
+import 'package:fresh_market/core/logging/logger.dart';
+import 'package:fresh_market/main.dart' as entrypoint;
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
@@ -29,14 +30,14 @@ class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
   @override
   void initState() {
     super.initState();
-    debugPrint('[APP] FreshMarketApp.initState - starting locale initialization');
+    AppLogger.info('[APP] FreshMarketApp.initState - starting locale initialization');
     _initLocaleWithTimeout();
     _initNotificationListener();
   }
 
   void _initNotificationListener() {
     _notificationSubscription = NotificationService.instance.onMessageReceived.listen((message) {
-      debugPrint('[FG NOTIFICATION] Notification received: ${message.messageId}');
+      AppLogger.info('[FG NOTIFICATION] Notification received: ${message.messageId}');
       final notification = message.notification;
       if (notification != null) {
         final currentLocale = ref.read(localeProvider);
@@ -81,17 +82,17 @@ class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
 
   Future<void> _initLocaleWithTimeout() async {
     try {
-      debugPrint('[APP] Loading locale from SharedPreferences...');
+      AppLogger.info('[APP] Loading locale from SharedPreferences...');
       await ref.read(localeProvider.notifier).load().timeout(const Duration(seconds: 5));
-      debugPrint('[APP] _initLocale - locale loaded');
+      AppLogger.info('[APP] _initLocale - locale loaded');
     } on TimeoutException {
-      debugPrint('[APP] _initLocale TIMEOUT after 5s - continuing anyway');
+      AppLogger.warning('[APP] _initLocale TIMEOUT after 5s - continuing anyway');
     } catch (e, st) {
-      debugPrint('[APP] _initLocale error: $e\n$st');
+      AppLogger.error('[APP] _initLocale error', e, st);
     }
     if (mounted) {
       setState(() => _initialized = true);
-      debugPrint('[APP] _initialized = true');
+      AppLogger.info('[APP] _initialized = true');
     }
   }
 
@@ -104,9 +105,9 @@ class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
   @override
   Widget build(BuildContext context) {
     final firebaseResult = ref.watch(firebaseInitResultProvider);
-    debugPrint('[APP] build() - _initialized=$_initialized, firebaseSuccess=${firebaseResult.isSuccess}');
+    AppLogger.info('[APP] build() - _initialized=$_initialized, firebaseSuccess=${firebaseResult.isSuccess}');
     if (!firebaseResult.isSuccess) {
-      debugPrint('[APP] Showing Firebase error screen');
+      AppLogger.warning('[APP] Showing Firebase error screen');
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
@@ -130,7 +131,7 @@ class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
                   ),
                   const SizedBox(height: 24),
                   FilledButton.icon(
-                    onPressed: () => Bootstrap.run(),
+                    onPressed: () => entrypoint.main(),
                     icon: const Icon(Icons.refresh),
                     label: const Text('Retry'),
                   ),
@@ -143,7 +144,7 @@ class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
     }
 
     if (!_initialized) {
-      debugPrint('[APP] Build: waiting for locale initialization');
+      AppLogger.info('[APP] Build: waiting for locale initialization');
       return const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
@@ -152,12 +153,12 @@ class _FreshMarketAppState extends ConsumerState<FreshMarketApp> {
       );
     }
 
-    debugPrint('[APP] Build: creating router');
+    AppLogger.info('[APP] Build: creating router');
     final locale = ref.watch(localeProvider);
     final isArabic = locale.languageCode == 'ar';
     final router = ref.watch(goRouterProvider);
 
-    debugPrint('[APP] Build: app ready - routing to splash page');
+    AppLogger.info('[APP] Build: app ready - routing to splash page');
     return MaterialApp.router(
       title: 'Fresh Market',
       scaffoldMessengerKey: scaffoldMessengerKey,

@@ -5,7 +5,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fresh_market/app.dart';
 import 'package:fresh_market/firebase_options.dart';
 import 'package:fresh_market/core/providers/firebase_providers.dart';
-import 'package:fresh_market/core/services/mock_repositories.dart';
+import 'package:fresh_market/core/mocks/mock_auth_repository.dart';
+import 'package:fresh_market/core/mocks/mock_category_repository.dart';
+import 'package:fresh_market/core/mocks/mock_product_repository.dart';
+import 'package:fresh_market/core/mocks/mock_offer_repository.dart';
+import 'package:fresh_market/core/mocks/mock_weight_unit_repository.dart';
+import 'package:fresh_market/core/mocks/mock_settings_repository.dart';
+import 'package:fresh_market/core/mocks/mock_user_repository.dart';
+import 'package:fresh_market/core/mocks/mock_notification_repository.dart';
+import 'package:fresh_market/core/mocks/mock_lookup_repository.dart';
+import 'package:fresh_market/core/mocks/mock_order_repository.dart';
+import 'package:fresh_market/core/mocks/mock_address_repository.dart';
+import 'package:fresh_market/core/mocks/mock_coupon_repository.dart';
+import 'package:fresh_market/core/mocks/mock_audit_log_repository.dart';
+import 'package:fresh_market/core/mocks/mock_supplier_repository.dart';
+import 'package:fresh_market/core/mocks/mock_purchase_order_repository.dart';
+import 'package:fresh_market/core/mocks/mock_supplier_payment_repository.dart';
+import 'package:fresh_market/core/mocks/mock_stock_history_repository.dart';
+import 'package:fresh_market/core/mocks/mock_batch_repository.dart';
+import 'package:fresh_market/core/mocks/mock_expense_repository.dart';
+import 'package:fresh_market/core/mocks/mock_warehouse_repository.dart';
 import 'package:fresh_market/core/services/notification_service.dart';
 
 import 'package:fresh_market/data/providers/auth_repository_provider.dart';
@@ -30,47 +49,59 @@ import 'package:fresh_market/data/providers/expense_repository_provider.dart';
 import 'package:fresh_market/data/providers/warehouse_repository_provider.dart';
 
 
+import 'package:fresh_market/core/logging/logger.dart';
+import 'package:fresh_market/config/env_config.dart';
+
+import 'package:flutter/foundation.dart';
+
 /// Bump this version whenever seed data changes so stale SharedPreferences
 /// is cleared automatically and fresh seeds are applied.
 const _dataVersion = 'v4';
 const _dataVersionKey = 'mock_data_version';
 
 /// Toggle between mock services and real Firebase production services.
-/// Pass --dart-define=USE_MOCK=false to compile/run in real Firebase mode.
-const bool useMock = bool.fromEnvironment('USE_MOCK', defaultValue: true);
+/// Pass --dart-define=USE_MOCK=true to compile/run in local mock mode.
+const bool useMock = bool.fromEnvironment('USE_MOCK', defaultValue: false);
 
 void main() async {
-  print("[BOOT] main started");
-  print("[BOOT] bootstrap started");
   WidgetsFlutterBinding.ensureInitialized();
+  EnvConfig.init(Flavor.production);
+  
+  AppLogger.info("[BOOT] main started");
+  AppLogger.info("[BOOT] EnvConfig initialized to production");
+
+  if (kReleaseMode && useMock) {
+    AppLogger.error("[BOOT] FATAL: Mock mode (USE_MOCK) is not allowed in release mode!");
+    throw StateError('Mock mode (USE_MOCK) is not allowed in release mode.');
+  }
 
   final prefs = await SharedPreferences.getInstance();
 
   // Clear stale data when seed version changes
   final storedVersion = prefs.getString(_dataVersionKey);
   if (storedVersion != _dataVersion) {
-    print("[BOOT] Data version mismatch ($storedVersion != $_dataVersion). Clearing stale mock data.");
+    AppLogger.warning("[BOOT] Data version mismatch ($storedVersion != $_dataVersion). Clearing stale mock data.");
     await prefs.clear();
     await prefs.setString(_dataVersionKey, _dataVersion);
-    print("[BOOT] Stale data cleared. Fresh seeds will be applied.");
+    AppLogger.info("[BOOT] Stale data cleared. Fresh seeds will be applied.");
   }
 
-  print("[FIREBASE] initialize start");
+  AppLogger.info("[FIREBASE] initialize start");
   FirebaseInitResult firebaseInitResult = FirebaseInitResult.notInitialized;
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    print("[FIREBASE] initialize success");
+    AppLogger.info("[FIREBASE] initialize success");
     await NotificationService.instance.initialize();
     firebaseInitResult = FirebaseInitResult.initialized;
   } catch (e) {
-    print("[FIREBASE] initialize failed: $e");
+    AppLogger.error("[FIREBASE] initialize failed: $e");
     firebaseInitResult = FirebaseInitResult.failed(e.toString());
   }
 
   // Re-read prefs after potential clear
   final freshPrefs = await SharedPreferences.getInstance();
 
-  print("[RUNAPP] runApp called - useMock=$useMock");
+  AppLogger.info("[RUNAPP] runApp called - useMock=$useMock");
   runApp(
     ProviderScope(
       overrides: useMock

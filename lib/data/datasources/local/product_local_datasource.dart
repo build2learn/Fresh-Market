@@ -33,7 +33,13 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
   @override
   Future<void> cacheAll(List<ProductDto> products) async {
     final prefs = _prefs ?? await SharedPreferences.getInstance();
-    final json = jsonEncode(products.map((p) => p.toMap()).toList());
+    final localMaps = products.map((p) {
+      final map = p.toMap();
+      map['createdAt'] = p.createdAt.toIso8601String();
+      map['updatedAt'] = p.updatedAt.toIso8601String();
+      return map;
+    }).toList();
+    final json = jsonEncode(localMaps);
     await prefs.setString(_cacheKey, json);
   }
 

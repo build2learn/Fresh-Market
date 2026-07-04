@@ -27,6 +27,9 @@ class CategoryDto {
 
   static DateTime _toDateTime(dynamic value) {
     if (value is DateTime) return value;
+    if (value is String) {
+      return DateTime.tryParse(value) ?? DateTime.now();
+    }
     try {
       return (value as dynamic).toDate() as DateTime;
     } catch (_) {
